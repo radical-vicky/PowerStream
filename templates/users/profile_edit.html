@@ -1,0 +1,751 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Profile · vidstream{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ====================================
+   Edit Profile Page - JustWatch Style
+   ==================================== */
+
+.edit-container {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+}
+
+/* Content Header - Like Video List */
+.content-header {
+    padding: 0 0 2rem;
+}
+
+.content-header__text-block h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.content-header__text-block p {
+    font-size: 1rem;
+    color: var(--text-secondary);
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+    transition: all 0.2s;
+}
+
+.back-link:hover {
+    color: var(--accent);
+    transform: translateX(-3px);
+}
+
+/* Edit Card */
+.edit-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+}
+
+/* Form Section - Like Filter Bar Sections */
+.form-section {
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-section__header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.form-section__header i {
+    color: var(--accent);
+    font-size: 1.1rem;
+}
+
+.form-section__header h3 {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+/* Media Grid */
+.media-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.media-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.media-label {
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* Avatar Upload */
+.avatar-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.current-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid var(--border);
+    background: var(--bg-dark);
+    flex-shrink: 0;
+}
+
+.current-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Cover Preview */
+.cover-preview {
+    width: 100%;
+    height: 100px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--bg-dark);
+    margin-bottom: 0.5rem;
+}
+
+.cover-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Upload Area - Like Filter Bar */
+.upload-area {
+    flex: 1;
+    background: var(--bg-dark);
+    border: 2px dashed var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.upload-area:hover {
+    border-color: var(--accent);
+    background: rgba(139, 92, 246, 0.02);
+}
+
+.upload-area.dragover {
+    border-color: var(--accent);
+    background: rgba(139, 92, 246, 0.05);
+}
+
+.upload-icon {
+    font-size: 1.25rem;
+    color: var(--accent);
+    margin-bottom: 0.25rem;
+    opacity: 0.7;
+}
+
+.upload-text {
+    color: var(--text-primary);
+    font-weight: 500;
+    margin-bottom: 0.1rem;
+    font-size: 0.85rem;
+}
+
+.upload-hint {
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    margin: 0;
+}
+
+.upload-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* Form Grid */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.form-group {
+    margin-bottom: 0;
+}
+
+.form-group.full-width {
+    grid-column: span 2;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.form-label i {
+    color: var(--accent);
+    width: 18px;
+    margin-right: 0.25rem;
+}
+
+/* Input Fields - Like Search Input */
+.input-wrapper {
+    position: relative;
+}
+
+.input-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--accent);
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
+
+.form-input,
+.form-textarea {
+    width: 100%;
+    padding: 0.7rem 0.75rem 0.7rem 2rem;
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.1);
+    background: var(--bg-hover);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.5;
+}
+
+.form-textarea {
+    padding-left: 0.75rem;
+    resize: vertical;
+    min-height: 100px;
+}
+
+.character-count {
+    display: block;
+    text-align: right;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+/* Checkbox */
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.6rem 0.75rem;
+}
+
+.checkbox-wrapper input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.checkbox-wrapper input[type="checkbox"]:checked {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.checkbox-wrapper label {
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 0.9rem;
+    flex: 1;
+}
+
+.form-hint {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    margin-top: 0.25rem;
+}
+
+/* Account Info - Like Stats Card */
+.account-info {
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem;
+}
+
+.info-row {
+    display: flex;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    width: 100px;
+    color: var(--text-secondary);
+}
+
+.info-value {
+    flex: 1;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* Action Buttons - Like Pagination Style */
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+}
+
+.btn-outline:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .edit-container {
+        padding: 1rem;
+    }
+
+    .edit-card {
+        padding: 1.5rem;
+    }
+
+    .media-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .avatar-wrapper {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .current-avatar {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto;
+    }
+
+    .upload-area {
+        width: 100%;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.full-width {
+        grid-column: span 1;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .content-header__text-block h1 {
+        font-size: 1.5rem;
+    }
+
+    .info-row {
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    .info-label {
+        width: 100%;
+    }
+
+    .checkbox-wrapper {
+        flex-wrap: wrap;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="edit-container">
+    <!-- Page Header - Like Video List -->
+    <div class="content-header">
+        <a href="{% url 'users:profile' user.username %}" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to profile
+        </a>
+        <div class="content-header__text-block">
+            <h1>Edit profile</h1>
+            <p class="text-secondary">Customize how others see you</p>
+        </div>
+    </div>
+
+    <!-- Edit Card -->
+    <div class="edit-card">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- Profile Media Section -->
+            <div class="form-section">
+                <div class="form-section__header">
+                    <i class="fas fa-images"></i>
+                    <h3>Profile Media</h3>
+                </div>
+
+                <div class="media-grid">
+                    <!-- Avatar Upload -->
+                    <div class="media-item">
+                        <span class="media-label">Profile picture</span>
+                        <div class="avatar-wrapper">
+                            <div class="current-avatar">
+                                <img src="{{ user.get_avatar_url }}" alt="Avatar" id="avatarPreview">
+                            </div>
+                            <div class="upload-area" id="avatarUpload">
+                                <div class="upload-icon">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                                <p class="upload-text">Click to change</p>
+                                <p class="upload-hint">JPG, PNG • Max 5MB</p>
+                                <input type="file" id="avatar" name="avatar" 
+                                       accept="image/jpeg,image/png,image/jpg" class="upload-input">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cover Upload -->
+                    <div class="media-item">
+                        <span class="media-label">Cover image</span>
+                        <div class="cover-preview">
+                            <img src="{{ user.get_cover_url }}" alt="Cover" id="coverPreview">
+                        </div>
+                        <div class="upload-area" id="coverUpload">
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <p class="upload-text">Click to change cover</p>
+                            <p class="upload-hint">1500x500px • JPG, PNG</p>
+                            <input type="file" id="cover_image" name="cover_image" 
+                                   accept="image/jpeg,image/png,image/jpg" class="upload-input">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Basic Information Section -->
+            <div class="form-section">
+                <div class="form-section__header">
+                    <i class="fas fa-user-circle"></i>
+                    <h3>Basic Information</h3>
+                </div>
+
+                <div class="form-grid">
+                    <!-- Bio -->
+                    <div class="form-group full-width">
+                        <label for="bio" class="form-label">
+                            <i class="fas fa-align-left"></i>
+                            Bio
+                        </label>
+                        <textarea class="form-textarea" id="bio" name="bio" rows="4" 
+                                  placeholder="Tell your story...">{{ user.bio }}</textarea>
+                        <span class="character-count" id="bioCount">0/500</span>
+                    </div>
+
+                    <!-- Location -->
+                    <div class="form-group">
+                        <label for="location" class="form-label">
+                            <i class="fas fa-map-marker-alt"></i>
+                            Location
+                        </label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-map-marker-alt input-icon"></i>
+                            <input type="text" class="form-input" id="location" name="location" 
+                                   value="{{ user.location }}" placeholder="City, Country">
+                        </div>
+                    </div>
+
+                    <!-- Website -->
+                    <div class="form-group">
+                        <label for="website" class="form-label">
+                            <i class="fas fa-link"></i>
+                            Website
+                        </label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-link input-icon"></i>
+                            <input type="url" class="form-input" id="website" name="website" 
+                                   value="{{ user.website }}" placeholder="https://example.com">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personal Information Section -->
+            <div class="form-section">
+                <div class="form-section__header">
+                    <i class="fas fa-heart"></i>
+                    <h3>Personal Information</h3>
+                </div>
+
+                <div class="form-grid">
+                    <!-- Birthday -->
+                    <div class="form-group">
+                        <label for="birthday" class="form-label">
+                            <i class="fas fa-calendar-alt"></i>
+                            Birthday
+                        </label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-calendar-alt input-icon"></i>
+                            <input type="date" class="form-input" id="birthday" name="birthday" 
+                                   value="{{ user.birthday|date:'Y-m-d' }}">
+                        </div>
+                    </div>
+
+                    <!-- Show Birthday Checkbox -->
+                    <div class="form-group checkbox-group">
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="show_birthday" name="show_birthday"
+                                   {% if user.show_birthday %}checked{% endif %}>
+                            <label for="show_birthday">Show birthday on profile</label>
+                        </div>
+                        <small class="form-hint">Your age will remain private</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Information Section -->
+            <div class="form-section">
+                <div class="form-section__header">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Account Information</h3>
+                </div>
+
+                <div class="account-info">
+                    <div class="info-row">
+                        <span class="info-label">Username</span>
+                        <span class="info-value">@{{ user.username }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Email</span>
+                        <span class="info-value">{{ user.email }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Member since</span>
+                        <span class="info-value">{{ user.date_joined|date:"F j, Y" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <a href="{% url 'users:profile' user.username %}" class="btn btn-outline">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Character counter for bio
+const bio = document.getElementById('bio');
+const bioCount = document.getElementById('bioCount');
+
+function updateBioCount() {
+    const count = bio.value.length;
+    bioCount.textContent = `${count}/500`;
+    bioCount.style.color = count > 500 ? '#ef4444' : 'var(--text-secondary)';
+}
+
+bio.addEventListener('input', updateBioCount);
+updateBioCount();
+
+// Drag and drop handling
+document.querySelectorAll('.upload-area').forEach(area => {
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        area.addEventListener(eventName, preventDefaults, false);
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        area.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        area.addEventListener(eventName, unhighlight, false);
+    });
+
+    area.addEventListener('drop', handleDrop, false);
+});
+
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+function highlight() {
+    this.classList.add('dragover');
+}
+
+function unhighlight() {
+    this.classList.remove('dragover');
+}
+
+function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    const input = this.querySelector('.upload-input');
+    input.files = files;
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
+// Avatar preview
+document.getElementById('avatar').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        if (file.size > 5 * 1024 * 1024) {
+            alert('File size must be less than 5MB');
+            this.value = '';
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('avatarPreview').src = e.target.result;
+            const uploadArea = document.getElementById('avatarUpload');
+            uploadArea.querySelector('.upload-text').innerHTML = '<i class="fas fa-check" style="color: var(--success);"></i> Ready';
+        }
+        reader.readAsDataURL(file);
+    }
+});
+
+// Cover preview
+document.getElementById('cover_image').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        if (file.size > 10 * 1024 * 1024) {
+            alert('File size must be less than 10MB');
+            this.value = '';
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('coverPreview').src = e.target.result;
+            const uploadArea = document.getElementById('coverUpload');
+            uploadArea.querySelector('.upload-text').innerHTML = '<i class="fas fa-check" style="color: var(--success);"></i> Ready';
+        }
+        reader.readAsDataURL(file);
+    }
+});
+</script>
+{% endblock %}

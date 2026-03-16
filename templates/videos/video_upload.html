@@ -1,0 +1,851 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Upload Video - vidstream{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ====================================
+   Professional Upload Design
+   Minimal, Clean, Functional
+   ==================================== */
+
+:root {
+    --upload-spacing: 2rem;
+    --upload-radius: 16px;
+    --upload-transition: all 0.2s ease;
+}
+
+.upload-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+}
+
+/* Header Section */
+.upload-header {
+    margin-bottom: 2.5rem;
+}
+
+.upload-header h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+}
+
+.upload-header p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+/* Simple Progress Steps */
+.upload-progress {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2.5rem;
+    position: relative;
+}
+
+.upload-progress::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--border);
+    z-index: 1;
+}
+
+.progress-step {
+    position: relative;
+    z-index: 2;
+    background: var(--bg-card);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    border: 2px solid var(--border);
+    transition: var(--upload-transition);
+}
+
+.progress-step.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+}
+
+.progress-step.completed {
+    background: var(--success);
+    border-color: var(--success);
+    color: white;
+}
+
+.step-label {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+/* Clean Cards */
+.upload-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--upload-radius);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    transition: var(--upload-transition);
+}
+
+.upload-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    margin-bottom: 1.5rem;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.card-title i {
+    color: var(--accent);
+    font-size: 1.25rem;
+}
+
+.card-subtitle {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    margin-left: 2rem;
+}
+
+/* Form Elements */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 0.5rem;
+}
+
+.form-group.full-width {
+    grid-column: span 2;
+}
+
+.form-label {
+    display: block;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.form-label i {
+    color: var(--accent);
+    margin-right: 0.5rem;
+    width: 16px;
+}
+
+.form-input,
+.modern-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    transition: var(--upload-transition);
+}
+
+.form-input:focus,
+.modern-select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+textarea.form-input {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.modern-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 16px;
+}
+
+/* Professional Upload Areas */
+.upload-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.upload-item {
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.upload-item h4 {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.upload-item h4 i {
+    color: var(--accent);
+}
+
+.upload-area {
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--upload-transition);
+    position: relative;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.upload-area:hover {
+    border-color: var(--accent);
+    background: rgba(139, 92, 246, 0.02);
+}
+
+.upload-area i {
+    font-size: 2rem;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+    opacity: 0.7;
+}
+
+.upload-area p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.upload-area small {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    opacity: 0.6;
+}
+
+.upload-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* Preview Containers */
+.preview-container {
+    margin-top: 1rem;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    position: relative;
+}
+
+.preview-container img {
+    width: 100%;
+    max-height: 150px;
+    object-fit: cover;
+    display: block;
+}
+
+.preview-container .video-info {
+    padding: 0.75rem;
+    background: var(--bg-card);
+    border-top: 1px solid var(--border);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.preview-container .video-info i {
+    color: var(--success);
+}
+
+/* Privacy Options - Clean */
+.privacy-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.privacy-option {
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--upload-transition);
+}
+
+.privacy-option:hover {
+    border-color: var(--accent);
+}
+
+.privacy-option.selected {
+    border-color: var(--accent);
+    background: rgba(139, 92, 246, 0.05);
+}
+
+.privacy-option i {
+    font-size: 1.25rem;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+}
+
+.privacy-option h5 {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.privacy-option span {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+/* Stats Bar */
+.upload-stats {
+    display: flex;
+    gap: 2rem;
+    padding: 1rem;
+    background: var(--bg-dark);
+    border-radius: 10px;
+    margin-top: 1.5rem;
+}
+
+.upload-stats span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.upload-stats i {
+    color: var(--accent);
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn {
+    flex: 1;
+    padding: 0.875rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    border: none;
+    transition: var(--upload-transition);
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* Loading Overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-text {
+    color: white;
+    font-size: 1rem;
+}
+
+/* Success Modal */
+.upload-success {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    z-index: 10000;
+    display: none;
+    min-width: 320px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.success-icon {
+    width: 64px;
+    height: 64px;
+    background: var(--success);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2rem;
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .upload-container {
+        padding: 1rem;
+    }
+
+    .form-grid,
+    .upload-grid,
+    .privacy-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.full-width {
+        grid-column: span 1;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .upload-stats {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .step-label {
+        display: none;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="upload-container">
+    <!-- Header -->
+    <div class="upload-header">
+        <h1>Upload video</h1>
+        <p>Share your content with the vidstream community</p>
+    </div>
+
+    <!-- Progress Steps -->
+    <div class="upload-progress">
+        <div class="progress-step active" data-step="1">
+            <span>1</span>
+            <span class="step-label">Details</span>
+        </div>
+        <div class="progress-step" data-step="2">
+            <span>2</span>
+            <span class="step-label">Media</span>
+        </div>
+        <div class="progress-step" data-step="3">
+            <span>3</span>
+            <span class="step-label">Publish</span>
+        </div>
+    </div>
+
+    <!-- Main Form -->
+    <form method="post" enctype="multipart/form-data" id="uploadForm">
+        {% csrf_token %}
+        
+        <!-- Basic Information -->
+        <div class="upload-card" data-step="1">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="fas fa-info-circle"></i>
+                    Basic Information
+                </div>
+                <div class="card-subtitle">Tell viewers about your video</div>
+            </div>
+
+            <div class="form-grid">
+                <!-- Title -->
+                <div class="form-group full-width">
+                    <label class="form-label">
+                        <i class="fas fa-heading"></i>
+                        Title
+                    </label>
+                    <input type="text" class="form-input" id="title" name="title" 
+                           placeholder="e.g., 'My Summer Adventure'" required>
+                </div>
+
+                <!-- Description -->
+                <div class="form-group full-width">
+                    <label class="form-label">
+                        <i class="fas fa-align-left"></i>
+                        Description
+                    </label>
+                    <textarea class="form-input" id="description" name="description" 
+                              placeholder="Describe what your video is about..." required></textarea>
+                </div>
+
+                <!-- Category -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-folder"></i>
+                        Category
+                    </label>
+                    <select class="modern-select" id="category" name="category">
+                        <option value="">Select category</option>
+                        {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Channel -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-tv"></i>
+                        Channel
+                    </label>
+                    <select class="modern-select" id="channel" name="channel">
+                        <option value="">No channel</option>
+                        {% for channel in user_channels %}
+                            <option value="{{ channel.id }}">{{ channel.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Media Upload -->
+        <div class="upload-card" data-step="2">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    Media Files
+                </div>
+                <div class="card-subtitle">Upload your thumbnail and video</div>
+            </div>
+
+            <div class="upload-grid">
+                <!-- Thumbnail -->
+                <div class="upload-item">
+                    <h4><i class="fas fa-image"></i> Thumbnail</h4>
+                    <div class="upload-area" id="thumbnailArea">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Click or drag to upload</p>
+                        <small>1280×720px recommended (Max 5MB)</small>
+                        <input type="file" id="thumbnail" name="thumbnail" 
+                               accept="image/jpeg,image/png,image/jpg" class="upload-input" required>
+                    </div>
+                    <div id="thumbnailPreview" class="preview-container" style="display: none;"></div>
+                </div>
+
+                <!-- Video -->
+                <div class="upload-item">
+                    <h4><i class="fas fa-video"></i> Video File</h4>
+                    <div class="upload-area" id="videoArea">
+                        <i class="fas fa-video"></i>
+                        <p>Click or drag to upload</p>
+                        <small>MP4, WebM, MOV (Max 2GB)</small>
+                        <input type="file" id="video_file" name="video_file" 
+                               accept="video/mp4,video/webm,video/quicktime" class="upload-input" required>
+                    </div>
+                    <div id="videoPreview" class="preview-container" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Privacy & Publishing -->
+        <div class="upload-card" data-step="3">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="fas fa-globe"></i>
+                    Privacy & Publishing
+                </div>
+                <div class="card-subtitle">Control who can see your video</div>
+            </div>
+
+            <!-- Privacy Options -->
+            <div class="privacy-grid">
+                <div class="privacy-option" data-privacy="public">
+                    <i class="fas fa-globe"></i>
+                    <h5>Public</h5>
+                    <span>Anyone can see</span>
+                </div>
+                <div class="privacy-option" data-privacy="unlisted">
+                    <i class="fas fa-link"></i>
+                    <h5>Unlisted</h5>
+                    <span>Anyone with link</span>
+                </div>
+                <div class="privacy-option" data-privacy="private">
+                    <i class="fas fa-lock"></i>
+                    <h5>Private</h5>
+                    <span>Only you</span>
+                </div>
+            </div>
+            <input type="hidden" id="privacy" name="privacy" value="public">
+
+            <!-- Stats -->
+            <div class="upload-stats">
+                <span><i class="fas fa-video"></i> Up to 4K quality</span>
+                <span><i class="fas fa-clock"></i> Processing: 2-5 min</span>
+                <span><i class="fas fa-shield-alt"></i> Encrypted upload</span>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="action-buttons">
+            <button type="button" class="btn btn-secondary" onclick="history.back()">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+                <i class="fas fa-cloud-upload-alt"></i> Publish Video
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div style="text-align: center;">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">Uploading your video...</p>
+        <p style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 0.5rem;">Please don't close this window</p>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="upload-success" id="successModal">
+    <div class="success-icon">
+        <i class="fas fa-check"></i>
+    </div>
+    <h3 style="margin-bottom: 0.5rem; color: var(--text-primary);">Uploaded!</h3>
+    <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Your video is now processing</p>
+    <a href="{% url 'videos:list' %}" class="btn btn-primary" style="display: inline-block; padding: 0.75rem 2rem; text-decoration: none;">
+        Go to Videos
+    </a>
+</div>
+
+<script>
+// Drag and drop
+document.querySelectorAll('.upload-area').forEach(area => {
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        area.addEventListener(eventName, preventDefaults, false);
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        area.addEventListener(eventName, () => area.classList.add('dragover'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        area.addEventListener(eventName, () => area.classList.remove('dragover'), false);
+    });
+
+    area.addEventListener('drop', handleDrop, false);
+});
+
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    const input = this.querySelector('.upload-input');
+    input.files = files;
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
+// Thumbnail preview with image display
+document.getElementById('thumbnail').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+        alert('File size must be less than 5MB');
+        this.value = '';
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const preview = document.getElementById('thumbnailPreview');
+        preview.innerHTML = `<img src="${e.target.result}" alt="Thumbnail">`;
+        preview.style.display = 'block';
+        
+        document.querySelector('#thumbnailArea p').innerHTML = '<i class="fas fa-check" style="color: var(--success);"></i> Thumbnail ready';
+    }
+    reader.readAsDataURL(file);
+    document.querySelector('[data-step="2"]').classList.add('completed');
+});
+
+// Video preview with file info
+document.getElementById('video_file').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024 * 1024) {
+        alert('File size must be less than 2GB');
+        this.value = '';
+        return;
+    }
+
+    const size = (file.size / (1024 * 1024)).toFixed(2);
+    const preview = document.getElementById('videoPreview');
+    preview.innerHTML = `
+        <div class="video-info">
+            <i class="fas fa-check-circle" style="color: var(--success);"></i>
+            <span>${file.name} (${size} MB)</span>
+        </div>
+    `;
+    preview.style.display = 'block';
+    
+    document.querySelector('#videoArea p').innerHTML = '<i class="fas fa-check" style="color: var(--success);"></i> Video ready';
+});
+
+// Privacy options
+document.querySelectorAll('.privacy-option').forEach(option => {
+    option.addEventListener('click', function() {
+        document.querySelectorAll('.privacy-option').forEach(opt => {
+            opt.classList.remove('selected');
+        });
+        this.classList.add('selected');
+        document.getElementById('privacy').value = this.dataset.privacy;
+    });
+});
+
+// Form submission
+document.getElementById('uploadForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Validate required fields
+    const title = document.getElementById('title').value;
+    const description = document.getElementById('description').value;
+    const thumbnail = document.getElementById('thumbnail').files[0];
+    const video = document.getElementById('video_file').files[0];
+
+    if (!title || !description || !thumbnail || !video) {
+        alert('Please fill in all required fields');
+        return;
+    }
+
+    // Show loading
+    document.getElementById('loadingOverlay').style.display = 'flex';
+    
+    // Submit form
+    this.submit();
+});
+
+// Progress steps
+document.querySelectorAll('#title, #description, #category').forEach(field => {
+    field.addEventListener('change', function() {
+        const title = document.getElementById('title').value;
+        const description = document.getElementById('description').value;
+        const category = document.getElementById('category').value;
+        
+        if (title && description && category) {
+            document.querySelector('[data-step="1"]').classList.add('completed');
+        }
+    });
+});
+
+// Auto-hide messages
+setTimeout(() => {
+    document.querySelectorAll('.alert').forEach(alert => {
+        alert.style.opacity = '0';
+        setTimeout(() => alert.remove(), 500);
+    });
+}, 5000);
+</script>
+{% endblock %}

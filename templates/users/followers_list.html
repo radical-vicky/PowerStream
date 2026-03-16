@@ -1,0 +1,713 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Followers · {{ profile_user.username }} · vidstream{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ====================================
+   Followers Page - JustWatch Style
+   ==================================== */
+
+.followers-container {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+}
+
+/* Content Header - Like Video List */
+.content-header {
+    padding: 0 0 2rem;
+}
+
+.content-header__text-block h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.content-header__text-block p {
+    font-size: 1rem;
+    color: var(--text-secondary);
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+    transition: all 0.2s;
+}
+
+.back-link:hover {
+    color: var(--accent);
+    transform: translateX(-3px);
+}
+
+/* Profile Info - Clickable Card */
+.profile-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 2rem;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.profile-info:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(139, 92, 246, 0.1);
+}
+
+.profile-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid var(--border);
+    background: var(--bg-dark);
+    transition: border-color 0.2s;
+}
+
+.profile-info:hover .profile-avatar {
+    border-color: var(--accent);
+}
+
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-details {
+    flex: 1;
+}
+
+.profile-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.verified-badge {
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+}
+
+.profile-stats {
+    display: flex;
+    gap: 1rem;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.profile-stats i {
+    color: var(--accent);
+    margin-right: 0.25rem;
+}
+
+.following-count-badge {
+    background: var(--accent);
+    color: white;
+    padding: 0.25rem 1rem;
+    border-radius: 30px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Followers List */
+.followers-list {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* Follower Item - Clickable Card */
+.follower-item {
+    display: block;
+    text-decoration: none;
+    border-bottom: 1px solid var(--border);
+    transition: all 0.2s;
+}
+
+.follower-item:last-child {
+    border-bottom: none;
+}
+
+.follower-item:hover {
+    background: var(--bg-hover);
+}
+
+.follower-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+}
+
+.follower-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+}
+
+.follower-avatar {
+    position: relative;
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+}
+
+.follower-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border);
+    transition: border-color 0.2s;
+}
+
+.follower-item:hover .follower-avatar img {
+    border-color: var(--accent);
+}
+
+.verified-badge-small {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    border: 2px solid var(--bg-card);
+}
+
+.follower-details {
+    flex: 1;
+}
+
+.follower-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+    display: inline-block;
+}
+
+.follower-bio {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+    max-width: 400px;
+}
+
+.no-bio {
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.follower-meta {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.meta-item i {
+    color: var(--accent);
+    font-size: 0.7rem;
+}
+
+.follower-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+}
+
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: 1px solid var(--border);
+    background: var(--bg-dark);
+    color: var(--text-secondary);
+}
+
+.btn-icon:hover {
+    transform: translateY(-2px);
+}
+
+.btn-icon.message:hover {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+
+.btn-icon.tip:hover {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    border-color: #f59e0b;
+}
+
+.btn-icon.remove:hover {
+    background: #ef4444;
+    color: white;
+    border-color: #ef4444;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.empty-state__icon {
+    width: 80px;
+    height: 80px;
+    background: rgba(139, 92, 246, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: var(--accent);
+    font-size: 2rem;
+}
+
+.empty-state h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+}
+
+.btn-outline:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-2px);
+}
+
+/* Pagination - Like Video List */
+.pagination-wrapper {
+    margin: 2rem 0 0;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.pagination__group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.pagination__arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.pagination__arrow:hover:not(.disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.pagination__arrow.disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.pagination__numbers {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.pagination__number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    padding: 0 0.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+.pagination__number:hover:not(.active) {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.pagination__number.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+}
+
+.pagination__info {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .followers-container {
+        padding: 1rem;
+    }
+
+    .profile-info {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .profile-stats {
+        justify-content: center;
+    }
+
+    .follower-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .follower-info {
+        width: 100%;
+    }
+
+    .follower-meta {
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .follower-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .pagination__numbers {
+        display: none;
+    }
+
+    .pagination__group {
+        flex: 1;
+    }
+
+    .pagination__arrow {
+        width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .follower-info {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .follower-avatar {
+        margin: 0 auto;
+    }
+
+    .follower-meta {
+        justify-content: center;
+    }
+
+    .follower-actions {
+        justify-content: center;
+    }
+
+    .empty-state {
+        padding: 2rem 1rem;
+    }
+
+    .empty-state__icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="followers-container">
+    <!-- Page Header - Like Video List -->
+    <div class="content-header">
+        <a href="{% url 'users:profile' profile_user.username %}" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to profile
+        </a>
+        <div class="content-header__text-block">
+            <h1>Followers</h1>
+            <p class="text-secondary">People who follow @{{ profile_user.username }}</p>
+        </div>
+    </div>
+
+    <!-- Profile Info - Clickable Card -->
+    <a href="{% url 'users:profile' profile_user.username %}" class="profile-info">
+        <div class="profile-avatar">
+            {% if profile_user.avatar and profile_user.avatar.url %}
+                <img src="{{ profile_user.avatar.url }}" alt="{{ profile_user.username }}">
+            {% else %}
+                <img src="{% static 'images/default-avatar.png' %}" alt="{{ profile_user.username }}">
+            {% endif %}
+        </div>
+        <div class="profile-details">
+            <div class="profile-name">
+                {{ profile_user.username }}
+                {% if profile_user.is_verified %}
+                    <span class="verified-badge">✓</span>
+                {% endif %}
+            </div>
+            <div class="profile-stats">
+                <span><i class="fas fa-users"></i> {{ profile_user.total_followers }} followers</span>
+                <span><i class="fas fa-video"></i> {{ profile_user.total_videos }} videos</span>
+            </div>
+        </div>
+        <div class="following-count-badge">
+            {{ followers.paginator.count }} total
+        </div>
+    </a>
+
+    <!-- Followers List -->
+    <div class="followers-list">
+        {% if followers %}
+            {% for follow in followers %}
+            <a href="{% url 'users:profile' follow.follower.username %}" class="follower-item">
+                <div class="follower-content">
+                    <div class="follower-info">
+                        <div class="follower-avatar">
+                            {% if follow.follower.avatar and follow.follower.avatar.url %}
+                                <img src="{{ follow.follower.avatar.url }}" alt="{{ follow.follower.username }}">
+                            {% else %}
+                                <img src="{% static 'images/default-avatar.png' %}" alt="{{ follow.follower.username }}">
+                            {% endif %}
+                            {% if follow.follower.is_verified %}
+                                <span class="verified-badge-small">✓</span>
+                            {% endif %}
+                        </div>
+                        <div class="follower-details">
+                            <span class="follower-name">{{ follow.follower.username }}</span>
+                            <div class="follower-bio">
+                                {% if follow.follower.bio %}
+                                    {{ follow.follower.bio|truncatechars:60 }}
+                                {% else %}
+                                    <span class="no-bio">No bio yet</span>
+                                {% endif %}
+                            </div>
+                            <div class="follower-meta">
+                                <span class="meta-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    Joined {{ follow.follower.date_joined|date:"M Y" }}
+                                </span>
+                                <span class="meta-item">
+                                    <i class="fas fa-users"></i>
+                                    {{ follow.follower.total_followers }} followers
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="follower-actions" onclick="event.stopPropagation()">
+                        {% if user.is_authenticated %}
+                            {% if user == profile_user %}
+                                <a href="{% url 'users:follow' follow.follower.username %}" 
+                                   class="btn-icon remove" title="Remove follower"
+                                   onclick="return confirm('Remove this follower?');">
+                                    <i class="fas fa-user-minus"></i>
+                                </a>
+                            {% endif %}
+
+                            {% if user != follow.follower %}
+                                <a href="{% url 'chat:start' follow.follower.username %}" 
+                                   class="btn-icon message" title="Send message"
+                                   onclick="event.stopPropagation()">
+                                    <i class="fas fa-comment"></i>
+                                </a>
+                                <a href="{% url 'interactions:tip' follow.follower.username %}" 
+                                   class="btn-icon tip" title="Send tip"
+                                   onclick="event.stopPropagation()">
+                                    <i class="fas fa-coins"></i>
+                                </a>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+
+            <!-- Pagination -->
+            {% if followers.has_other_pages %}
+            <div class="pagination-wrapper">
+                <nav class="pagination">
+                    <div class="pagination__group">
+                        {% if followers.has_previous %}
+                            <a href="?page={{ followers.previous_page_number }}" class="pagination__arrow">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        {% else %}
+                            <span class="pagination__arrow disabled">
+                                <i class="fas fa-chevron-left"></i>
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="pagination__numbers">
+                        {% for i in followers.paginator.page_range %}
+                            {% if followers.number == i %}
+                                <span class="pagination__number active">{{ i }}</span>
+                            {% elif i > followers.number|add:'-3' and i < followers.number|add:'3' %}
+                                <a href="?page={{ i }}" class="pagination__number">{{ i }}</a>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <div class="pagination__group">
+                        {% if followers.has_next %}
+                            <a href="?page={{ followers.next_page_number }}" class="pagination__arrow">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        {% else %}
+                            <span class="pagination__arrow disabled">
+                                <i class="fas fa-chevron-right"></i>
+                            </span>
+                        {% endif %}
+                    </div>
+                </nav>
+                <div class="pagination__info">
+                    Page {{ followers.number }} of {{ followers.paginator.num_pages }}
+                </div>
+            </div>
+            {% endif %}
+
+        {% else %}
+            <!-- Empty State -->
+            <div class="empty-state">
+                <div class="empty-state__icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3>No followers yet</h3>
+                {% if user == profile_user %}
+                    <p>When someone follows you, they'll appear here.</p>
+                    <a href="{% url 'users:profile' user.username %}" class="btn btn-primary">
+                        <i class="fas fa-user"></i> Back to profile
+                    </a>
+                {% else %}
+                    <p>@{{ profile_user.username }} doesn't have any followers yet.</p>
+                    <a href="{% url 'users:profile' profile_user.username %}" class="btn btn-outline">
+                        <i class="fas fa-user"></i> View profile
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// Prevent action buttons from triggering the parent link
+document.querySelectorAll('.follower-actions a').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,780 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create Channel - vidstream{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ====================================
+   Create Channel Page - JustWatch Style
+   ==================================== */
+
+.create-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+}
+
+/* Content Header - Like Video List */
+.content-header {
+    padding: 0 0 2rem;
+}
+
+.content-header__text-block h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.content-header__text-block p {
+    font-size: 1rem;
+    color: var(--text-secondary);
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+    transition: all 0.2s;
+}
+
+.back-link:hover {
+    color: var(--accent);
+    transform: translateX(-3px);
+}
+
+/* Create Card - Like Filter Bar Style */
+.create-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+}
+
+/* Form Section - Like Filter Bar Sections */
+.form-section {
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-section__header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.form-section__header i {
+    color: var(--accent);
+    font-size: 1.1rem;
+}
+
+.form-section__header h3 {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+/* Form Grid */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-group.full-width {
+    grid-column: span 2;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.form-label i {
+    color: var(--accent);
+    width: 18px;
+    margin-right: 0.25rem;
+}
+
+/* Input Fields - Like Search Input */
+.input-wrapper {
+    position: relative;
+}
+
+.input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--accent);
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
+
+.form-input,
+.form-textarea {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.1);
+    background: var(--bg-hover);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.5;
+}
+
+.form-textarea {
+    padding-left: 1rem;
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Slug Input */
+.slug-wrapper {
+    display: flex;
+    align-items: center;
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.2s;
+}
+
+.slug-wrapper:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.1);
+}
+
+.slug-prefix {
+    padding: 0.75rem 0 0.75rem 1rem;
+    color: var(--accent);
+    font-weight: 500;
+    background: var(--bg-dark);
+    border-right: 1px solid var(--border);
+}
+
+.slug-input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+.slug-input:focus {
+    outline: none;
+}
+
+.form-hint {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+    background: rgba(139, 92, 246, 0.05);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.form-hint i {
+    color: var(--accent);
+    margin-right: 0.5rem;
+}
+
+/* Upload Grid */
+.upload-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Upload Area - Like Filter Bar */
+.upload-area {
+    background: var(--bg-dark);
+    border: 2px dashed var(--border);
+    border-radius: 8px;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.upload-area:hover {
+    border-color: var(--accent);
+    background: rgba(139, 92, 246, 0.02);
+}
+
+.upload-area.dragover {
+    border-color: var(--accent);
+    background: rgba(139, 92, 246, 0.05);
+}
+
+.upload-icon {
+    font-size: 2rem;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    opacity: 0.7;
+}
+
+.upload-text {
+    color: var(--text-primary);
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    font-size: 0.95rem;
+}
+
+.upload-hint {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.upload-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* Preview Containers */
+.preview-container {
+    margin-top: 1rem;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+}
+
+.preview-container img {
+    width: 100%;
+    max-height: 150px;
+    object-fit: cover;
+}
+
+.preview-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin: 1rem auto;
+    overflow: hidden;
+    border: 2px solid var(--accent);
+}
+
+.preview-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Private Option - Like Category Chip */
+.private-option {
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.option-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.option-toggle {
+    position: relative;
+    display: inline-block;
+    width: 46px;
+    height: 24px;
+}
+
+.option-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--border);
+    transition: .3s;
+    border-radius: 34px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background-color: var(--accent);
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(22px);
+}
+
+.option-text h5 {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.option-text p {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+/* Action Buttons - Like Pagination Style */
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1rem;
+}
+
+.btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+}
+
+.btn-outline:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .create-container {
+        margin: 1rem auto;
+        padding: 0 1rem;
+    }
+
+    .create-card {
+        padding: 1.5rem;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.full-width {
+        grid-column: span 1;
+    }
+
+    .upload-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .option-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 480px) {
+    .content-header__text-block h1 {
+        font-size: 1.5rem;
+    }
+
+    .slug-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .slug-prefix {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 0.75rem 1rem;
+    }
+
+    .upload-area {
+        min-height: 160px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="create-container">
+    <!-- Page Header - Like Video List -->
+    <div class="content-header">
+        <a href="{% url 'channels:list' %}" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to channels
+        </a>
+        <div class="content-header__text-block">
+            <h1>Create a channel</h1>
+            <p class="text-secondary">Start building your community and share your passion</p>
+        </div>
+    </div>
+
+    <!-- Create Card -->
+    <div class="create-card">
+        <form method="post" enctype="multipart/form-data" id="createForm">
+            {% csrf_token %}
+            
+            <!-- Basic Information Section -->
+            <div class="form-section">
+                <div class="form-section__header">
+                    <i class="fas fa-info-circle"></i>
+                    <h3>Basic Information</h3>
+                </div>
+                
+                <div class="form-grid">
+                    <!-- Channel Name -->
+                    <div class="form-group full-width">
+                        <label for="name" class="form-label">
+                            <i class="fas fa-tag"></i>
+                            Channel Name
+                        </label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-pencil-alt input-icon"></i>
+                            <input type="text" class="form-input" id="name" name="name" 
+                                   placeholder="e.g., Tech Reviews, Gaming Channel" required>
+                        </div>
+                    </div>
+
+                    <!-- Channel URL (Slug) -->
+                    <div class="form-group full-width">
+                        <label for="slug" class="form-label">
+                            <i class="fas fa-link"></i>
+                            Channel URL
+                        </label>
+                        <div class="slug-wrapper">
+                            <span class="slug-prefix">@</span>
+                            <input type="text" class="slug-input" id="slug" name="slug" 
+                                   placeholder="channel-name" required>
+                        </div>
+                        <small class="form-hint">
+                            <i class="fas fa-info-circle"></i>
+                            Your channel will be accessible at: <strong>/channels/@<span id="slugPreview">channel-name</span></strong>
+                        </small>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-group full-width">
+                        <label for="description" class="form-label">
+                            <i class="fas fa-align-left"></i>
+                            Description
+                        </label>
+                        <textarea class="form-textarea" id="description" name="description" 
+                                  rows="4" placeholder="Tell viewers what your channel is about..." required></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Media Upload Section -->
+            <div class="form-section">
+                <div class="form-section__header">
+                    <i class="fas fa-image"></i>
+                    <h3>Channel Media</h3>
+                </div>
+                
+                <div class="upload-grid">
+                    <!-- Avatar Upload -->
+                    <div>
+                        <label class="form-label">
+                            <i class="fas fa-camera"></i>
+                            Channel Avatar
+                        </label>
+                        <div class="upload-area" id="avatarUpload">
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <p class="upload-text">Click or drag to upload</p>
+                            <p class="upload-hint">500x500px recommended</p>
+                            <input type="file" id="avatar" name="avatar" 
+                                   accept="image/jpeg,image/png,image/jpg" class="upload-input">
+                        </div>
+                        <div id="avatarPreview" class="preview-container" style="display: none;">
+                            <div class="preview-avatar">
+                                <img src="" alt="Avatar preview">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cover Upload -->
+                    <div>
+                        <label class="form-label">
+                            <i class="fas fa-image"></i>
+                            Cover Image
+                        </label>
+                        <div class="upload-area" id="coverUpload">
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <p class="upload-text">Click or drag to upload</p>
+                            <p class="upload-hint">1500x500px recommended</p>
+                            <input type="file" id="cover_image" name="cover_image" 
+                                   accept="image/jpeg,image/png,image/jpg" class="upload-input">
+                        </div>
+                        <div id="coverPreview" class="preview-container" style="display: none;">
+                            <img src="" alt="Cover preview">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Privacy Section -->
+            <div class="form-section">
+                <div class="form-section__header">
+                    <i class="fas fa-lock"></i>
+                    <h3>Privacy Settings</h3>
+                </div>
+                
+                <div class="private-option">
+                    <div class="option-content">
+                        <label class="option-toggle">
+                            <input type="checkbox" id="is_private" name="is_private">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <div class="option-text">
+                            <h5>Make channel private</h5>
+                            <p>Private channels are only visible to subscribers. Only approved members can view content.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="{% url 'channels:list' %}" class="btn btn-outline">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-plus-circle"></i>
+                    Create Channel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Auto-generate slug from name
+document.getElementById('name').addEventListener('input', function() {
+    const name = this.value;
+    const slug = name.toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+    
+    document.getElementById('slug').value = slug;
+    document.getElementById('slugPreview').textContent = slug || 'channel-name';
+});
+
+// Update slug preview on manual slug input
+document.getElementById('slug').addEventListener('input', function() {
+    const slug = this.value || 'channel-name';
+    document.getElementById('slugPreview').textContent = slug;
+});
+
+// Drag and drop handling
+document.querySelectorAll('.upload-area').forEach(area => {
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        area.addEventListener(eventName, preventDefaults, false);
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        area.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        area.addEventListener(eventName, unhighlight, false);
+    });
+
+    area.addEventListener('drop', handleDrop, false);
+});
+
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+function highlight() {
+    this.classList.add('dragover');
+}
+
+function unhighlight() {
+    this.classList.remove('dragover');
+}
+
+function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    const input = this.querySelector('.upload-input');
+    input.files = files;
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
+// Avatar preview
+document.getElementById('avatar').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        if (file.size > 5 * 1024 * 1024) {
+            alert('File size must be less than 5MB');
+            this.value = '';
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('avatarPreview');
+            preview.querySelector('img').src = e.target.result;
+            preview.style.display = 'block';
+            
+            const uploadArea = document.getElementById('avatarUpload');
+            uploadArea.querySelector('.upload-text').innerHTML = '<i class="fas fa-check" style="color: var(--success);"></i> Avatar ready';
+        }
+        reader.readAsDataURL(file);
+    }
+});
+
+// Cover preview
+document.getElementById('cover_image').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        if (file.size > 10 * 1024 * 1024) {
+            alert('File size must be less than 10MB');
+            this.value = '';
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('coverPreview');
+            preview.querySelector('img').src = e.target.result;
+            preview.style.display = 'block';
+            
+            const uploadArea = document.getElementById('coverUpload');
+            uploadArea.querySelector('.upload-text').innerHTML = '<i class="fas fa-check" style="color: var(--success);"></i> Cover ready';
+        }
+        reader.readAsDataURL(file);
+    }
+});
+
+// Form validation
+document.getElementById('createForm').addEventListener('submit', function(e) {
+    const name = document.getElementById('name').value.trim();
+    const slug = document.getElementById('slug').value.trim();
+    const description = document.getElementById('description').value.trim();
+    
+    if (!name || !slug || !description) {
+        e.preventDefault();
+        alert('Please fill in all required fields');
+        return;
+    }
+    
+    if (!/^[a-z0-9-]+$/.test(slug)) {
+        e.preventDefault();
+        alert('Channel URL can only contain lowercase letters, numbers, and hyphens');
+        return;
+    }
+});
+
+// Auto-hide messages
+setTimeout(() => {
+    document.querySelectorAll('.alert').forEach(alert => {
+        alert.style.transition = 'opacity 0.5s';
+        alert.style.opacity = '0';
+        setTimeout(() => alert.remove(), 500);
+    });
+}, 5000);
+</script>
+{% endblock %}

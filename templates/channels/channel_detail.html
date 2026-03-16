@@ -1,0 +1,1132 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ channel.name }} - vidstream{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ====================================
+   Channel Page - Professional Design
+   ==================================== */
+
+.channel-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+}
+
+/* Hero Section */
+.channel-hero {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+/* Cover Image */
+.channel-cover {
+    height: 300px;
+    position: relative;
+    overflow: hidden;
+}
+
+.channel-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.channel-hero:hover .channel-cover img {
+    transform: scale(1.05);
+}
+
+.cover-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%);
+}
+
+.default-cover {
+    height: 100%;
+    background: linear-gradient(135deg, var(--accent), #6d28d9, #ec4899);
+    background-size: 200% 200%;
+    animation: gradientMove 8s ease infinite;
+}
+
+@keyframes gradientMove {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* Channel Info Overlay */
+.channel-info-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 2rem;
+    color: white;
+    z-index: 2;
+}
+
+.channel-main-info {
+    display: flex;
+    align-items: flex-end;
+    gap: 2rem;
+}
+
+/* Avatar - Now Clickable */
+.channel-avatar-wrapper {
+    position: relative;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.channel-avatar-wrapper:hover {
+    transform: scale(1.05);
+}
+
+.channel-avatar-wrapper a {
+    display: block;
+    text-decoration: none;
+}
+
+.channel-avatar {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    border: 4px solid white;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    background: var(--bg-dark);
+}
+
+.channel-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: all 0.3s ease;
+}
+
+.channel-avatar-wrapper:hover .channel-avatar img {
+    filter: brightness(1.1);
+}
+
+.default-avatar {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--accent), #ec4899);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: white;
+}
+
+.verified-badge-large {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+    font-size: 1rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    z-index: 3;
+    pointer-events: none; /* Allows clicking through to the avatar link */
+}
+
+/* Channel Details */
+.channel-details {
+    flex: 1;
+    padding-bottom: 0.5rem;
+}
+
+.channel-name {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    letter-spacing: -0.02em;
+}
+
+.channel-stats {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 0.4rem 1rem;
+    border-radius: 30px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.stat-item i {
+    color: var(--accent);
+}
+
+.owner-link {
+    color: white;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: color 0.2s;
+}
+
+.owner-link:hover {
+    color: var(--accent);
+}
+
+/* Action Buttons */
+.channel-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 40px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent), #6d28d9);
+    color: white;
+    box-shadow: 0 5px 15px rgba(139, 92, 246, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(139, 92, 246, 0.5);
+}
+
+.btn-outline {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    backdrop-filter: blur(10px);
+}
+
+.btn-outline:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+}
+
+/* Description Card */
+.description-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.description-card h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.description-card h3 i {
+    color: var(--accent);
+}
+
+.description-content {
+    color: var(--text-secondary);
+    line-height: 1.7;
+    font-size: 0.95rem;
+}
+
+/* Pending Suggestions Section */
+.suggestions-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.section-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.pending-badge {
+    background: #f59e0b;
+    color: white;
+    padding: 0.2rem 0.8rem;
+    border-radius: 30px;
+    font-size: 0.8rem;
+    margin-left: 0.5rem;
+}
+
+.suggestions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1rem;
+}
+
+.suggestion-card {
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.suggestion-card:hover {
+    border-color: #f59e0b;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(245, 158, 11, 0.1);
+}
+
+.suggestion-card.pending::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: #f59e0b;
+}
+
+.suggestion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.suggestion-user {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.suggestion-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border);
+}
+
+.suggestion-user-info {
+    line-height: 1.4;
+}
+
+.suggestion-username {
+    font-weight: 600;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 0.95rem;
+    display: block;
+    transition: color 0.2s;
+}
+
+.suggestion-username:hover {
+    color: var(--accent);
+}
+
+.suggestion-time {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.status-badge.pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+    border: 1px solid #f59e0b;
+}
+
+.suggestion-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.suggestion-description {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.suggestion-funding {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid var(--success);
+    color: var(--success);
+    padding: 0.4rem 0.75rem;
+    border-radius: 30px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+.suggestion-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-sm {
+    padding: 0.4rem 1rem;
+    font-size: 0.85rem;
+    border-radius: 30px;
+}
+
+/* Videos Section */
+.videos-section {
+    margin-top: 2rem;
+}
+
+.videos-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.videos-header__left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.videos-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.videos-title i {
+    color: var(--accent);
+    margin-right: 0.5rem;
+}
+
+.videos-count {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    background: var(--bg-hover);
+    padding: 0.3rem 0.75rem;
+    border-radius: 30px;
+    border: 1px solid var(--border);
+}
+
+.videos-sort {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Videos Grid - JustWatch Style */
+.videos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.video-card {
+    transition: transform 0.2s;
+    position: relative;
+}
+
+.video-card:hover {
+    transform: translateY(-4px);
+}
+
+.video-card__link {
+    text-decoration: none;
+    display: block;
+}
+
+.video-card__poster {
+    position: relative;
+    aspect-ratio: 2/3;
+    background: var(--bg-hover);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.video-card__poster img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.video-card:hover .video-card__poster img {
+    transform: scale(1.05);
+}
+
+.poster-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--bg-hover), var(--bg-card));
+    color: var(--text-secondary);
+    font-size: 2.5rem;
+}
+
+.video-duration {
+    position: absolute;
+    bottom: 0.5rem;
+    right: 0.5rem;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    z-index: 2;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.poster-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.7) 100%);
+    display: flex;
+    align-items: flex-end;
+    padding: 1rem;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 1;
+}
+
+.video-card:hover .poster-overlay {
+    opacity: 1;
+}
+
+.channel-indicator {
+    background: var(--accent);
+    color: white;
+    padding: 0.4rem 0.8rem;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transform: translateY(10px);
+    transition: transform 0.3s;
+}
+
+.video-card:hover .channel-indicator {
+    transform: translateY(0);
+}
+
+.video-card__content {
+    padding: 0.25rem 0;
+}
+
+.video-card__title {
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--text-primary);
+    margin: 0 0 0.5rem 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.video-card__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.video-author {
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.video-author i {
+    color: var(--accent);
+    font-size: 0.9rem;
+}
+
+.video-date {
+    color: var(--text-secondary);
+}
+
+.video-card__stats {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.video-card__stats i {
+    margin-right: 0.2rem;
+    font-size: 0.75rem;
+}
+
+.video-card__stats .fa-eye {
+    color: var(--text-secondary);
+}
+
+.video-card__stats .fa-heart {
+    color: #ef4444;
+}
+
+/* Empty State */
+.empty-state {
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 3rem;
+    margin: 2rem 0;
+}
+
+.empty-state__content i {
+    font-size: 3rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+.empty-state__content h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.empty-state__content p {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .videos-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+}
+
+@media (max-width: 992px) {
+    .channel-cover {
+        height: 250px;
+    }
+
+    .channel-avatar {
+        width: 120px;
+        height: 120px;
+    }
+
+    .channel-name {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .channel-container {
+        padding: 1rem;
+    }
+
+    .channel-cover {
+        height: 200px;
+    }
+
+    .channel-main-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .channel-avatar {
+        width: 100px;
+        height: 100px;
+    }
+
+    .channel-info-overlay {
+        padding: 1.5rem;
+    }
+
+    .channel-name {
+        font-size: 1.75rem;
+    }
+
+    .channel-stats {
+        gap: 0.75rem;
+    }
+
+    .stat-item {
+        padding: 0.25rem 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    .suggestions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .videos-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .videos-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .channel-cover {
+        height: 150px;
+    }
+
+    .channel-avatar {
+        width: 80px;
+        height: 80px;
+    }
+
+    .default-avatar {
+        font-size: 2.5rem;
+    }
+
+    .channel-name {
+        font-size: 1.5rem;
+    }
+
+    .channel-stats {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .stat-item {
+        width: fit-content;
+    }
+
+    .channel-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .videos-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+
+    .video-card__title {
+        font-size: 0.9rem;
+    }
+
+    .video-card__meta {
+        font-size: 0.75rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+
+    .video-card__stats {
+        font-size: 0.7rem;
+    }
+
+    .suggestion-header {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .status-badge {
+        align-self: flex-start;
+    }
+
+    .empty-state {
+        padding: 2rem;
+    }
+
+    .empty-state__content i {
+        font-size: 2.5rem;
+    }
+
+    .empty-state__content h3 {
+        font-size: 1.1rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="channel-container">
+    <!-- Hero Section -->
+    <div class="channel-hero">
+        <!-- Cover Image -->
+        <div class="channel-cover">
+            {% if channel.cover_image %}
+                <img src="{{ channel.cover_image.url }}" alt="{{ channel.name }}">
+            {% else %}
+                <div class="default-cover"></div>
+            {% endif %}
+            <div class="cover-overlay"></div>
+        </div>
+
+        <!-- Channel Info Overlay -->
+        <div class="channel-info-overlay">
+            <div class="channel-main-info">
+                <!-- Avatar - Now Clickable -->
+                <div class="channel-avatar-wrapper">
+                    <a href="{% url 'users:profile' channel.owner.username %}">
+                        <div class="channel-avatar">
+                            {% if channel.avatar %}
+                                <img src="{{ channel.avatar.url }}" alt="{{ channel.name }}">
+                            {% else %}
+                                <div class="default-avatar">
+                                    {{ channel.name|first|upper }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% if channel.is_verified %}
+                            <span class="verified-badge-large">
+                                <i class="fas fa-check-circle"></i>
+                            </span>
+                        {% endif %}
+                    </a>
+                </div>
+
+                <!-- Channel Details -->
+                <div class="channel-details">
+                    <h1 class="channel-name">{{ channel.name }}</h1>
+                    
+                    <div class="channel-stats">
+                        <span class="stat-item">
+                            <i class="fas fa-user"></i>
+                            <a href="{% url 'users:profile' channel.owner.username %}" class="owner-link">
+                                {{ channel.owner.username }}
+                                {% if channel.owner.is_verified %}
+                                    <i class="fas fa-check-circle" style="color: var(--accent);"></i>
+                                {% endif %}
+                            </a>
+                        </span>
+                        <span class="stat-item">
+                            <i class="fas fa-users"></i>
+                            {{ channel.subscriber_count }} subscribers
+                        </span>
+                        <span class="stat-item">
+                            <i class="fas fa-video"></i>
+                            {{ channel.videos.count }} videos
+                        </span>
+                        <span class="stat-item">
+                            <i class="fas fa-calendar"></i>
+                            Joined {{ channel.created_at|date:"M Y" }}
+                        </span>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="channel-actions">
+                        {% if user.is_authenticated %}
+                            {% if user == channel.owner %}
+                                <a href="{% url 'channels:edit' channel.slug %}" class="btn btn-outline">
+                                    <i class="fas fa-edit"></i>
+                                    Edit Channel
+                                </a>
+                            {% else %}
+                                <a href="{% url 'channels:subscribe' channel.slug %}" 
+                                   class="btn {% if user in channel.subscribers.all %}btn-outline{% else %}btn-primary{% endif %}">
+                                    <i class="fas fa-{% if user in channel.subscribers.all %}check{% else %}plus-circle{% endif %}"></i>
+                                    {% if user in channel.subscribers.all %}Subscribed{% else %}Subscribe{% endif %}
+                                </a>
+                                <a href="{% url 'channels:suggest_post' channel.slug %}" class="btn btn-success">
+                                    <i class="fas fa-plus-circle"></i>
+                                    Suggest Video
+                                </a>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Description Card -->
+    {% if channel.description %}
+    <div class="description-card">
+        <h3>
+            <i class="fas fa-info-circle"></i>
+            About
+        </h3>
+        <div class="description-content">
+            {{ channel.description|linebreaks }}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Pending Suggestions Section - Only visible to channel owner -->
+    {% if user.is_authenticated and user == channel.owner %}
+        {% if pending_suggestions %}
+        <div class="suggestions-section">
+            <div class="section-header">
+                <h2>
+                    <i class="fas fa-clock" style="color: #f59e0b;"></i>
+                    Pending Suggestions
+                    <span class="pending-badge">{{ pending_suggestions.count }}</span>
+                </h2>
+                <a href="#" class="btn btn-outline btn-sm" onclick="toggleSuggestions()">
+                    <i class="fas fa-chevron-down" id="toggleIcon"></i>
+                    <span id="toggleText">Show</span>
+                </a>
+            </div>
+            
+            <div class="suggestions-grid" id="suggestionsGrid">
+                {% for suggestion in pending_suggestions %}
+                <div class="suggestion-card pending">
+                    <div class="suggestion-header">
+                        <div class="suggestion-user">
+                            <img src="{% if suggestion.user.avatar %}{{ suggestion.user.avatar.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" 
+                                 alt="{{ suggestion.user.username }}" class="suggestion-avatar">
+                            <div class="suggestion-user-info">
+                                <a href="{% url 'users:profile' suggestion.user.username %}" class="suggestion-username">
+                                    {{ suggestion.user.username }}
+                                </a>
+                                <span class="suggestion-time">{{ suggestion.created_at|timesince }} ago</span>
+                            </div>
+                        </div>
+                        <span class="status-badge pending">Pending</span>
+                    </div>
+                    
+                    <h4 class="suggestion-title">{{ suggestion.title|truncatechars:60 }}</h4>
+                    <p class="suggestion-description">{{ suggestion.description|truncatechars:100 }}</p>
+                    
+                    {% if suggestion.funding_amount %}
+                    <div class="suggestion-funding">
+                        <i class="fas fa-coins"></i>
+                        ${{ suggestion.funding_amount }} funding requested
+                    </div>
+                    {% endif %}
+                    
+                    <div class="suggestion-actions">
+                        <a href="{% url 'channels:review_suggestion' suggestion.id %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-clipboard-check"></i>
+                            Review
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <div class="description-card" style="border-color: #f59e0b;">
+            <h3>
+                <i class="fas fa-clock" style="color: #f59e0b;"></i>
+                No Pending Suggestions
+            </h3>
+            <div class="description-content">
+                <p>You don't have any pending suggestions at the moment. When users suggest content, they'll appear here.</p>
+            </div>
+        </div>
+        {% endif %}
+    {% endif %}
+
+    <!-- Videos Section -->
+    <div class="videos-section">
+        <div class="videos-header">
+            <div class="videos-header__left">
+                <h2 class="videos-title">
+                    <i class="fas fa-video"></i>
+                    Videos
+                </h2>
+                <span class="videos-count">{{ channel.videos.count }} titles</span>
+            </div>
+            {% if channel.videos.count > 0 %}
+            <span class="videos-sort">sorted by latest</span>
+            {% endif %}
+        </div>
+
+        {% if videos %}
+        <div class="videos-grid">
+            {% for video in videos %}
+            <div class="video-card">
+                <a href="{% url 'videos:detail' video.id %}" class="video-card__link">
+                    <div class="video-card__poster">
+                        {% if video.thumbnail %}
+                            <img src="{{ video.thumbnail.url }}" alt="{{ video.title }}" loading="lazy">
+                        {% else %}
+                            <div class="poster-placeholder">
+                                <i class="fas fa-video"></i>
+                            </div>
+                        {% endif %}
+                        {% if video.duration %}
+                            <span class="video-duration">{{ video.formatted_duration }}</span>
+                        {% endif %}
+                        
+                        <!-- Channel indicator on hover -->
+                        <div class="poster-overlay">
+                            <span class="channel-indicator">
+                                <i class="fas fa-tv"></i> Channel video
+                            </span>
+                        </div>
+                    </div>
+                    <div class="video-card__content">
+                        <h3 class="video-card__title">{{ video.title|truncatechars:60 }}</h3>
+                        <div class="video-card__meta">
+                            <span class="video-author">
+                                <i class="fas fa-user-circle"></i> {{ video.user.username }}
+                            </span>
+                            <span class="video-date">{{ video.created_at|date:"M j, Y" }}</span>
+                        </div>
+                        <div class="video-card__stats">
+                            <span><i class="fas fa-eye"></i> {{ video.view_count|default:"0" }} views</span>
+                            <span>•</span>
+                            <span><i class="fas fa-heart"></i> {{ video.likes_count }} likes</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state__content">
+                <i class="fas fa-video-slash"></i>
+                <h3>No videos in this channel yet</h3>
+                {% if user == channel.owner %}
+                    <p>Start building your channel by uploading videos</p>
+                    <a href="{% url 'videos:upload' %}" class="btn btn-primary">
+                        <i class="fas fa-cloud-upload-alt"></i> Upload your first video
+                    </a>
+                {% else %}
+                    <p>Check back later for content from this channel</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// Toggle suggestions visibility
+function toggleSuggestions() {
+    const grid = document.getElementById('suggestionsGrid');
+    const icon = document.getElementById('toggleIcon');
+    const text = document.getElementById('toggleText');
+    
+    if (grid.style.display === 'none' || getComputedStyle(grid).display === 'none') {
+        grid.style.display = 'grid';
+        icon.className = 'fas fa-chevron-up';
+        text.textContent = 'Hide';
+    } else {
+        grid.style.display = 'none';
+        icon.className = 'fas fa-chevron-down';
+        text.textContent = 'Show';
+    }
+}
+
+// Auto-refresh for new suggestions (optional)
+setInterval(function() {
+    // You can add AJAX call here to check for new suggestions
+    // and update the count badge dynamically
+}, 30000); // Check every 30 seconds
+</script>
+{% endblock %}

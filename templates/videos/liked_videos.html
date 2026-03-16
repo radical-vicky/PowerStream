@@ -1,0 +1,746 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Liked Videos - vidstream{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Page Header with Stats -->
+    <div class="content-header">
+        <div class="content-header__text-block">
+            <h1>
+                <i class="fas fa-heart" style="color: #ef4444; margin-right: 0.5rem;"></i>
+                Liked videos
+            </h1>
+            <p class="text-secondary">Videos you've enjoyed and saved</p>
+        </div>
+        <a href="{% url 'videos:list' %}" class="btn btn-primary">
+            <i class="fas fa-compass"></i> Browse more videos
+        </a>
+    </div>
+
+    <!-- Stats Cards -->
+    {% if videos %}
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon liked">
+                <i class="fas fa-heart"></i>
+            </div>
+            <div class="stat-value">{{ videos.paginator.count }}</div>
+            <div class="stat-label">Liked videos</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-eye"></i>
+            </div>
+            <div class="stat-value">{{ total_views|default:"0" }}</div>
+            <div class="stat-label">Total views</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-value">{{ total_hours|default:"0" }}</div>
+            <div class="stat-label">Hours of content</div>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <div class="filter-bar__row">
+            <!-- Search Form -->
+            <div class="filter-bar__search">
+                <div class="search-wrapper">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="search" class="search-input" placeholder="Search liked videos..." id="searchInput">
+                </div>
+            </div>
+
+            <!-- Sort Dropdown -->
+            <div class="filter-bar__sort">
+                <select class="sort-select" id="sortFilter">
+                    <option value="recent" {% if sort == 'recent' %}selected{% endif %}>Recently liked</option>
+                    <option value="oldest" {% if sort == 'oldest' %}selected{% endif %}>Oldest first</option>
+                    <option value="most_viewed" {% if sort == 'most_viewed' %}selected{% endif %}>Most viewed</option>
+                    <option value="most_liked" {% if sort == 'most_liked' %}selected{% endif %}>Most liked</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Count -->
+    <div class="results-header">
+        <span class="results-count">{{ videos.paginator.count }} videos</span>
+    </div>
+    {% endif %}
+
+    <!-- Videos Grid -->
+    {% if videos %}
+    <div class="videos-grid" id="videosGrid">
+        {% for video in videos %}
+        <div class="video-card">
+            <a href="{% url 'videos:detail' video.pk %}" class="video-card__link">
+                <div class="video-card__poster">
+                    {% if video.thumbnail %}
+                        <img src="{{ video.thumbnail.url }}" alt="{{ video.title }}" loading="lazy">
+                    {% else %}
+                        <div class="poster-placeholder">
+                            <i class="fas fa-video"></i>
+                        </div>
+                    {% endif %}
+                    <span class="liked-badge">
+                        <i class="fas fa-heart"></i> Liked
+                    </span>
+                    {% if video.duration %}
+                        <span class="video-duration">{{ video.formatted_duration }}</span>
+                    {% endif %}
+                </div>
+                <div class="video-card__content">
+                    <h3 class="video-card__title">{{ video.title|truncatechars:60 }}</h3>
+                    <div class="video-card__meta">
+                        <a href="{% url 'users:profile' video.user.username %}" class="video-author">
+                            {% if video.user.avatar %}
+                                <img src="{{ video.user.avatar.url }}" alt="{{ video.user.username }}" class="author-avatar">
+                            {% else %}
+                                <img src="{% static 'images/default-avatar.png' %}" alt="{{ video.user.username }}" class="author-avatar">
+                            {% endif %}
+                            {{ video.user.username }}
+                        </a>
+                        <span class="video-date">{{ video.created_at|date:"M j, Y" }}</span>
+                    </div>
+                    <div class="video-card__stats">
+                        <span><i class="fas fa-eye"></i> {{ video.video_views }}</span>
+                        <span>•</span>
+                        <span><i class="fas fa-heart" style="color: #ef4444;"></i> {{ video.likes_count }}</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div class="empty-state">
+        <div class="empty-state__content">
+            <i class="fas fa-heart" style="color: #ef4444; font-size: 3rem; margin-bottom: 1rem;"></i>
+            <h2>No liked videos yet</h2>
+            <p>When you like videos, they'll appear here. Start exploring and find content you love!</p>
+            <div class="empty-state__actions">
+                <a href="{% url 'videos:list' %}" class="btn btn-primary">
+                    <i class="fas fa-compass"></i> Browse videos
+                </a>
+                <a href="{% url 'channels:list' %}" class="btn btn-outline">
+                    <i class="fas fa-tv"></i> Explore channels
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Pagination -->
+    {% if videos.has_other_pages %}
+    <div class="pagination-wrapper">
+        <nav class="pagination">
+            <div class="pagination__group">
+                {% if videos.has_previous %}
+                    <a href="?page={{ videos.previous_page_number }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" 
+                       class="pagination__arrow">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                {% else %}
+                    <span class="pagination__arrow disabled">
+                        <i class="fas fa-chevron-left"></i>
+                    </span>
+                {% endif %}
+            </div>
+
+            <div class="pagination__numbers">
+                {% for i in videos.paginator.page_range %}
+                    {% if videos.number == i %}
+                        <span class="pagination__number active">{{ i }}</span>
+                    {% elif i > videos.number|add:'-3' and i < videos.number|add:'3' %}
+                        <a href="?page={{ i }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" 
+                           class="pagination__number">{{ i }}</a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <div class="pagination__group">
+                {% if videos.has_next %}
+                    <a href="?page={{ videos.next_page_number }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" 
+                       class="pagination__arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                {% else %}
+                    <span class="pagination__arrow disabled">
+                        <i class="fas fa-chevron-right"></i>
+                    </span>
+                {% endif %}
+            </div>
+        </nav>
+        <div class="pagination__info">
+            Page {{ videos.number }} of {{ videos.paginator.num_pages }}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    /* Content Header */
+    .content-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 2rem 0 1rem;
+    }
+
+    .content-header__text-block h1 {
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+    }
+
+    .content-header__text-block p {
+        font-size: 1rem;
+        color: var(--text-secondary);
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: all 0.2s;
+    }
+
+    .stat-card:hover {
+        border-color: var(--accent);
+        transform: translateY(-2px);
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        background: rgba(139, 92, 246, 0.1);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        color: var(--accent);
+        font-size: 1.5rem;
+    }
+
+    .stat-icon.liked {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+        line-height: 1;
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    /* Filter Bar */
+    .filter-bar {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .filter-bar__row {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+    .filter-bar__search {
+        display: flex;
+        gap: 0.5rem;
+        flex: 2;
+        min-width: 300px;
+    }
+
+    .search-wrapper {
+        position: relative;
+        flex: 1;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 2.5rem;
+        background: var(--bg-hover);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--accent);
+    }
+
+    .filter-bar__sort {
+        min-width: 180px;
+    }
+
+    .sort-select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: var(--bg-hover);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+    }
+
+    /* Results Header */
+    .results-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .results-count {
+        font-weight: 500;
+    }
+
+    /* Videos Grid */
+    .videos-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .video-card {
+        transition: transform 0.2s;
+    }
+
+    .video-card:hover {
+        transform: translateY(-4px);
+    }
+
+    .video-card__link {
+        text-decoration: none;
+        display: block;
+    }
+
+    .video-card__poster {
+        position: relative;
+        aspect-ratio: 2/3;
+        background: var(--bg-hover);
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 0.75rem;
+    }
+
+    .video-card__poster img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s;
+    }
+
+    .video-card:hover .video-card__poster img {
+        transform: scale(1.05);
+    }
+
+    .liked-badge {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: rgba(239, 68, 68, 0.9);
+        backdrop-filter: blur(4px);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        z-index: 1;
+    }
+
+    .poster-placeholder {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-hover);
+        color: var(--text-secondary);
+        font-size: 2rem;
+    }
+
+    .video-duration {
+        position: absolute;
+        bottom: 0.5rem;
+        right: 0.5rem;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .video-card__content {
+        padding: 0.25rem 0;
+    }
+
+    .video-card__title {
+        font-size: 1rem;
+        font-weight: 500;
+        line-height: 1.4;
+        color: var(--text-primary);
+        margin: 0 0 0.5rem 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .video-card__meta {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.25rem;
+    }
+
+    .video-author {
+        color: var(--text-secondary);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        transition: color 0.2s;
+    }
+
+    .video-author:hover {
+        color: #ef4444;
+    }
+
+    .author-avatar {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .video-date {
+        color: var(--text-secondary);
+    }
+
+    .video-card__stats {
+        display: flex;
+        gap: 0.5rem;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    .video-card__stats i {
+        margin-right: 0.25rem;
+    }
+
+    /* Buttons */
+    .btn {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: var(--accent);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: var(--accent-hover);
+    }
+
+    .btn-outline {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text-primary);
+    }
+
+    .btn-outline:hover {
+        border-color: #ef4444;
+        color: #ef4444;
+    }
+
+    /* Empty State */
+    .empty-state {
+        min-height: 400px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 3rem;
+        margin: 2rem 0;
+    }
+
+    .empty-state__content i {
+        font-size: 3rem;
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+    }
+
+    .empty-state__content h2 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+    }
+
+    .empty-state__content p {
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+        max-width: 400px;
+    }
+
+    .empty-state__actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    /* Pagination */
+    .pagination-wrapper {
+        margin: 3rem 0 2rem;
+    }
+
+    .pagination {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .pagination__group {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .pagination__arrow {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text-primary);
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .pagination__arrow:hover:not(.disabled) {
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+
+    .pagination__arrow.disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+
+    .pagination__numbers {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .pagination__number {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+        height: 40px;
+        padding: 0 0.5rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text-primary);
+        text-decoration: none;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+    }
+
+    .pagination__number:hover:not(.active) {
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+
+    .pagination__number.active {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: white;
+    }
+
+    .pagination__info {
+        text-align: center;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .content-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .content-header .btn {
+            width: 100%;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .filter-bar__row {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .filter-bar__search {
+            min-width: auto;
+        }
+
+        .filter-bar__sort {
+            min-width: auto;
+        }
+
+        .videos-grid {
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .pagination__numbers {
+            display: none;
+        }
+
+        .pagination__group {
+            flex: 1;
+        }
+
+        .pagination__arrow {
+            width: 100%;
+        }
+
+        .empty-state__actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .videos-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+    }
+</style>
+
+<script>
+// Search functionality
+const searchInput = document.getElementById('searchInput');
+if (searchInput) {
+    searchInput.addEventListener('keyup', function() {
+        const searchText = this.value.toLowerCase();
+        const videos = document.querySelectorAll('.video-card');
+        let visibleCount = 0;
+        
+        videos.forEach(video => {
+            const title = video.querySelector('.video-card__title')?.textContent.toLowerCase() || '';
+            const author = video.querySelector('.video-author')?.textContent.toLowerCase() || '';
+            if (title.includes(searchText) || author.includes(searchText)) {
+                video.style.display = 'block';
+                visibleCount++;
+            } else {
+                video.style.display = 'none';
+            }
+        });
+        
+        // Update visible count
+        const countSpan = document.querySelector('.results-count');
+        if (countSpan) {
+            countSpan.textContent = visibleCount + ' videos';
+        }
+    });
+}
+
+// Sort filter
+const sortFilter = document.getElementById('sortFilter');
+if (sortFilter) {
+    sortFilter.addEventListener('change', function() {
+        const sort = this.value;
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set('sort', sort);
+        window.location.search = urlParams.toString();
+    });
+}
+</script>
+{% endblock %}

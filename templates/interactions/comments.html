@@ -1,0 +1,613 @@
+{% load static %}
+
+<!-- Comments Section Component - JustWatch Style -->
+<div class="comments-section">
+    <!-- Section Header -->
+    <div class="comments-header">
+        <h3 class="comments-title">
+            <i class="fas fa-comments"></i>
+            Comments
+            <span class="comments-count">{{ video.comments_count }}</span>
+        </h3>
+    </div>
+
+    <!-- Comment Form -->
+    {% if user.is_authenticated %}
+    <form method="post" action="{% url 'videos:add_comment' video.id %}" class="comment-form">
+        {% csrf_token %}
+        <div class="comment-form-wrapper">
+            <div class="comment-avatar">
+                {% if user.avatar and user.avatar.url %}
+                    <img src="{{ user.avatar.url }}" alt="{{ user.username }}">
+                {% else %}
+                    <img src="{% static 'images/default-avatar.png' %}" alt="{{ user.username }}">
+                {% endif %}
+            </div>
+            <div class="comment-input-wrapper">
+                <input type="text" name="content" class="comment-input" 
+                       placeholder="Add a comment..." required>
+                <button type="submit" class="comment-submit">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </form>
+    {% else %}
+    <div class="login-prompt">
+        <p>Sign in to join the conversation</p>
+        <a href="{% url 'account_login' %}?next={{ request.path }}" class="btn btn-primary btn-sm">
+            Sign In
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Comments List -->
+    <div class="comments-list">
+        {% for comment in comments %}
+        <div class="comment-item" id="comment-{{ comment.id }}">
+            <div class="comment-avatar">
+                {% if comment.user.avatar and comment.user.avatar.url %}
+                    <img src="{{ comment.user.avatar.url }}" alt="{{ comment.user.username }}">
+                {% else %}
+                    <img src="{% static 'images/default-avatar.png' %}" alt="{{ comment.user.username }}">
+                {% endif %}
+            </div>
+            <div class="comment-content">
+                <div class="comment-header">
+                    <a href="{% url 'users:profile' comment.user.username %}" class="comment-author">
+                        {{ comment.user.username }}
+                        {% if comment.user.is_verified %}
+                            <span class="verified-badge">✓</span>
+                        {% endif %}
+                    </a>
+                    <span class="comment-time">{{ comment.created_at|timesince }} ago</span>
+                </div>
+                <p class="comment-text">{{ comment.content }}</p>
+                
+                <!-- Comment Actions -->
+                <div class="comment-actions">
+                    {% if user.is_authenticated %}
+                        <button class="action-btn reply-btn" data-comment-id="{{ comment.id }}">
+                            <i class="fas fa-reply"></i>
+                            Reply
+                        </button>
+                        {% if user == comment.user %}
+                            <button class="action-btn delete-comment" data-comment-id="{{ comment.id }}">
+                                <i class="fas fa-trash-alt"></i>
+                                Delete
+                            </button>
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+                <!-- Reply Form -->
+                <div class="reply-form d-none" id="reply-form-{{ comment.id }}">
+                    <form method="post" action="{% url 'videos:add_comment' video.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                        <div class="reply-form-wrapper">
+                            <input type="text" name="content" class="reply-input" 
+                                   placeholder="Write a reply...">
+                            <button type="submit" class="reply-submit">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Replies -->
+                {% if comment.replies.all %}
+                    <div class="replies-list">
+                        {% for reply in comment.replies.all %}
+                            <div class="reply-item" id="comment-{{ reply.id }}">
+                                <div class="reply-avatar">
+                                    {% if reply.user.avatar and reply.user.avatar.url %}
+                                        <img src="{{ reply.user.avatar.url }}" alt="{{ reply.user.username }}">
+                                    {% else %}
+                                        <img src="{% static 'images/default-avatar.png' %}" alt="{{ reply.user.username }}">
+                                    {% endif %}
+                                </div>
+                                <div class="reply-content">
+                                    <div class="reply-header">
+                                        <a href="{% url 'users:profile' reply.user.username %}" class="reply-author">
+                                            {{ reply.user.username }}
+                                            {% if reply.user.is_verified %}
+                                                <span class="verified-badge">✓</span>
+                                            {% endif %}
+                                        </a>
+                                        <span class="reply-time">{{ reply.created_at|timesince }} ago</span>
+                                    </div>
+                                    <p class="reply-text">{{ reply.content }}</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-comments">
+            <div class="empty-icon">
+                <i class="fas fa-comments"></i>
+            </div>
+            <h4>No comments yet</h4>
+            <p>Be the first to share your thoughts!</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+/* Comments Section - JustWatch Style */
+.comments-section {
+    width: 100%;
+}
+
+.comments-header {
+    margin-bottom: 1.5rem;
+}
+
+.comments-title {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.comments-title i {
+    color: var(--accent);
+}
+
+.comments-count {
+    background: var(--bg-hover);
+    color: var(--text-secondary);
+    padding: 0.2rem 0.6rem;
+    border-radius: 30px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-left: 0.5rem;
+}
+
+/* Comment Form */
+.comment-form {
+    margin-bottom: 2rem;
+}
+
+.comment-form-wrapper {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.comment-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.comment-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.comment-input-wrapper {
+    flex: 1;
+    position: relative;
+}
+
+.comment-input {
+    width: 100%;
+    padding: 0.75rem 3rem 0.75rem 1rem;
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 40px;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+.comment-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--bg-hover);
+}
+
+.comment-submit {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.comment-submit:hover {
+    transform: translateY(-50%) scale(1.1);
+}
+
+/* Login Prompt */
+.login-prompt {
+    text-align: center;
+    padding: 1.5rem;
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 2rem;
+}
+
+.login-prompt p {
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+}
+
+/* Comments List */
+.comments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.comment-item {
+    display: flex;
+    gap: 1rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.comment-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.comment-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.comment-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.comment-author {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.comment-author:hover {
+    color: var(--accent);
+}
+
+.verified-badge {
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    width: 14px;
+    height: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+}
+
+.comment-time {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.comment-text {
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
+}
+
+/* Comment Actions */
+.comment-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.action-btn:hover {
+    color: var(--accent);
+    background: var(--bg-hover);
+}
+
+/* Reply Form */
+.reply-form {
+    margin-top: 1rem;
+    margin-left: 2rem;
+}
+
+.reply-form-wrapper {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.reply-input {
+    flex: 1;
+    padding: 0.5rem 1rem;
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 30px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.reply-input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.reply-submit {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.reply-submit:hover {
+    transform: scale(1.1);
+}
+
+/* Replies List */
+.replies-list {
+    margin-top: 1rem;
+    margin-left: 2rem;
+    padding-left: 1rem;
+    border-left: 2px solid var(--border);
+}
+
+.reply-item {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.reply-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.reply-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.reply-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.reply-content {
+    flex: 1;
+}
+
+.reply-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.25rem;
+    flex-wrap: wrap;
+}
+
+.reply-author {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+}
+
+.reply-author:hover {
+    color: var(--accent);
+}
+
+.reply-time {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+}
+
+.reply-text {
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* Empty State */
+.empty-comments {
+    text-align: center;
+    padding: 3rem 1rem;
+}
+
+.empty-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(139, 92, 246, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    color: var(--accent);
+    font-size: 1.5rem;
+}
+
+.empty-comments h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.empty-comments p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--accent-hover);
+}
+
+.btn-sm {
+    padding: 0.4rem 1rem;
+    font-size: 0.85rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .comment-form-wrapper {
+        flex-direction: column;
+    }
+
+    .comment-avatar {
+        width: 36px;
+        height: 36px;
+    }
+
+    .comment-item {
+        flex-direction: column;
+    }
+
+    .reply-form {
+        margin-left: 1rem;
+    }
+
+    .replies-list {
+        margin-left: 1rem;
+    }
+
+    .reply-item {
+        flex-direction: column;
+    }
+
+    .reply-avatar {
+        width: 28px;
+        height: 28px;
+    }
+}
+
+@media (max-width: 480px) {
+    .comment-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+
+    .comment-actions {
+        flex-wrap: wrap;
+    }
+
+    .reply-form-wrapper {
+        flex-direction: column;
+    }
+
+    .reply-submit {
+        width: 100%;
+        border-radius: 30px;
+    }
+
+    .empty-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+}
+</style>
+
+<script>
+// Reply button functionality
+document.querySelectorAll('.reply-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const commentId = this.dataset.commentId;
+        const replyForm = document.getElementById(`reply-form-${commentId}`);
+        replyForm.classList.toggle('d-none');
+        
+        if (!replyForm.classList.contains('d-none')) {
+            replyForm.querySelector('input').focus();
+        }
+    });
+});
+
+// Delete comment functionality (you'll need to implement the view)
+document.querySelectorAll('.delete-comment').forEach(btn => {
+    btn.addEventListener('click', function() {
+        if (confirm('Delete this comment?')) {
+            const commentId = this.dataset.commentId;
+            // Add your delete logic here
+            console.log('Delete comment:', commentId);
+        }
+    });
+});
+</script>

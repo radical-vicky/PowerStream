@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# Sitemap location [citation:6]
+Sitemap: {{ SITE_URL }}/sitemap.xml
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /accounts/
+Disallow: /users/*/edit/
+Disallow: /videos/upload/
+Disallow: /chat/

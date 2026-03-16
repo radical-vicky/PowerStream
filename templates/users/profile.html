@@ -1,0 +1,1402 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ profile_user.username }} · vidstream{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ====================================
+   Profile Page - JustWatch Style
+   ==================================== */
+
+.profile-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+}
+
+/* Cover Section - Like Video Player Style */
+.cover-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.cover-image-wrapper {
+    height: 300px;
+    position: relative;
+    overflow: hidden;
+}
+
+.cover-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.cover-image-wrapper:hover .cover-image {
+    transform: scale(1.02);
+}
+
+.default-cover {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--accent), #6d28d9, #ec4899);
+    background-size: 200% 200%;
+    animation: gradientMove 8s ease infinite;
+}
+
+@keyframes gradientMove {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+.edit-cover-btn {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.2s;
+    z-index: 2;
+}
+
+.edit-cover-btn:hover {
+    background: var(--accent);
+    transform: translateY(-2px);
+}
+
+/* Profile Header - Like Channel Hero */
+.profile-header {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+/* Avatar Section */
+.avatar-section {
+    flex-shrink: 0;
+}
+
+.avatar-wrapper {
+    position: relative;
+    width: 120px;
+    height: 120px;
+}
+
+.avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--bg-card);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.verified-badge {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--bg-card);
+    font-size: 1rem;
+}
+
+.edit-avatar-btn {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+}
+
+.edit-avatar-btn:hover {
+    background: var(--accent);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* User Info Section */
+.user-info-section {
+    flex: 1;
+    min-width: 250px;
+}
+
+.user-name-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.user-name {
+    font-size: 2rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.verified-tag {
+    background: var(--accent);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 30px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.user-bio {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.user-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.detail-item i {
+    color: var(--accent);
+    width: 16px;
+}
+
+.detail-item a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.detail-item a:hover {
+    color: var(--accent);
+}
+
+/* Action Buttons - Like Video List Buttons */
+.action-buttons {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+}
+
+.btn-outline:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-2px);
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+}
+
+.btn-warning:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(245, 158, 11, 0.3);
+}
+
+/* Stats Grid - Like Filter Bar Style */
+.stats-section {
+    margin-bottom: 2rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1rem;
+}
+
+.stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s;
+}
+
+.stat-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(139, 92, 246, 0.1);
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.stat-icon.videos {
+    background: rgba(139, 92, 246, 0.1);
+    color: var(--accent);
+}
+
+.stat-icon.followers {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.stat-icon.following {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.stat-icon.views {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.stat-icon.likes {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text-primary);
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* Followers Carousel - Like Category Chips */
+.followers-carousel-section {
+    margin-bottom: 2rem;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.section-title i {
+    color: var(--accent);
+}
+
+.view-all {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: all 0.2s;
+}
+
+.view-all:hover {
+    gap: 0.5rem;
+}
+
+.followers-carousel {
+    display: flex;
+    gap: 0.75rem;
+    overflow-x: auto;
+    padding: 0.5rem 0;
+    scrollbar-width: thin;
+}
+
+.followers-carousel::-webkit-scrollbar {
+    height: 4px;
+}
+
+.followers-carousel::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+}
+
+.followers-carousel::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+}
+
+.follower-card {
+    flex: 0 0 80px;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.follower-card:hover {
+    transform: translateY(-2px);
+}
+
+.follower-avatar {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 0.5rem;
+}
+
+.follower-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border);
+}
+
+.mini-verified {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    border: 2px solid var(--bg-card);
+}
+
+.follower-username {
+    display: block;
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Content Tabs - Like Category Chips */
+.content-tabs-section {
+    margin-top: 2rem;
+}
+
+.tabs-header {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2rem;
+}
+
+.tab-btn {
+    padding: 0.75rem 1.5rem;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    font-size: 0.95rem;
+}
+
+.tab-btn:hover {
+    color: var(--text-primary);
+}
+
+.tab-btn.active {
+    color: var(--accent);
+}
+
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--accent);
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Videos Grid - Like Video List */
+.videos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.video-card {
+    transition: transform 0.2s;
+}
+
+.video-card:hover {
+    transform: translateY(-4px);
+}
+
+.video-card__link {
+    text-decoration: none;
+    display: block;
+}
+
+.video-card__poster {
+    position: relative;
+    aspect-ratio: 2/3;
+    background: var(--bg-hover);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.video-card__poster img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.video-card:hover .video-card__poster img {
+    transform: scale(1.05);
+}
+
+.poster-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--bg-hover), var(--bg-card));
+    color: var(--text-secondary);
+    font-size: 2.5rem;
+}
+
+.video-duration {
+    position: absolute;
+    bottom: 0.5rem;
+    right: 0.5rem;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    z-index: 2;
+    backdrop-filter: blur(4px);
+}
+
+.privacy-badge {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(4px);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    z-index: 2;
+}
+
+.privacy-badge.private {
+    background: rgba(239, 68, 68, 0.9);
+}
+
+.privacy-badge.unlisted {
+    background: rgba(245, 158, 11, 0.9);
+}
+
+.video-card__content {
+    padding: 0.25rem 0;
+}
+
+.video-card__title {
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--text-primary);
+    margin: 0 0 0.5rem 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.video-card__meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.video-card__stats {
+    display: flex;
+    gap: 0.75rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.video-card__stats i {
+    margin-right: 0.2rem;
+    font-size: 0.75rem;
+}
+
+.video-card__stats .fa-eye {
+    color: var(--text-secondary);
+}
+
+.video-card__stats .fa-heart {
+    color: #ef4444;
+}
+
+.video-date {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+/* About Tab */
+.about-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.about-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.about-card h3 {
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 0 0 1rem 0;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.about-card h3 i {
+    color: var(--accent);
+}
+
+.about-card p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.details-list,
+.stats-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.details-list li,
+.stats-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.details-list li:last-child,
+.stats-list li:last-child {
+    border-bottom: none;
+}
+
+.details-list .detail-label,
+.stats-list .stat-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.details-list .detail-value {
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.details-list .detail-value a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.details-list .detail-value a:hover {
+    text-decoration: underline;
+}
+
+.stats-list .stat-value {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+/* Pagination - Like Video List */
+.pagination-wrapper {
+    margin: 3rem 0 2rem;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.pagination__group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.pagination__arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.pagination__arrow:hover:not(.disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.pagination__arrow.disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.pagination__numbers {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.pagination__number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    padding: 0 0.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+.pagination__number:hover:not(.active) {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.pagination__number.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+}
+
+.pagination__info {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+/* Empty State - Like Video List */
+.empty-state {
+    text-align: center;
+    padding: 4rem 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.empty-state__icon {
+    width: 80px;
+    height: 80px;
+    background: rgba(139, 92, 246, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: var(--accent);
+    font-size: 2rem;
+}
+
+.empty-state h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .about-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 992px) {
+    .videos-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .profile-container {
+        padding: 1rem;
+    }
+
+    .cover-image-wrapper {
+        height: 200px;
+    }
+
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+        padding: 1.5rem;
+    }
+
+    .user-name-row {
+        justify-content: center;
+    }
+
+    .user-details {
+        justify-content: center;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .videos-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+
+    .about-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pagination__numbers {
+        display: none;
+    }
+
+    .pagination__group {
+        flex: 1;
+    }
+
+    .pagination__arrow {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .cover-image-wrapper {
+        height: 150px;
+    }
+
+    .avatar-wrapper {
+        width: 100px;
+        height: 100px;
+    }
+
+    .user-name {
+        font-size: 1.5rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stat-card {
+        padding: 1rem;
+    }
+
+    .stat-value {
+        font-size: 1.25rem;
+    }
+
+    .videos-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+
+    .video-card__title {
+        font-size: 0.9rem;
+    }
+
+    .video-card__stats {
+        font-size: 0.7rem;
+        gap: 0.5rem;
+    }
+
+    .tabs-header {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .tab-btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    .tab-btn.active::after {
+        display: none;
+    }
+
+    .followers-carousel {
+        gap: 0.5rem;
+    }
+
+    .follower-card {
+        flex: 0 0 70px;
+    }
+
+    .follower-avatar {
+        width: 50px;
+        height: 50px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <!-- Cover Section -->
+    <div class="cover-section">
+        <div class="cover-image-wrapper">
+            {% if profile_user.cover_image %}
+                <img src="{{ profile_user.cover_image.url }}" alt="Cover" class="cover-image">
+            {% else %}
+                <div class="default-cover"></div>
+            {% endif %}
+            
+            {% if user == profile_user %}
+                <a href="{% url 'users:profile_edit' user.username %}" class="edit-cover-btn">
+                    <i class="fas fa-camera"></i>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <!-- Avatar -->
+        <div class="avatar-section">
+            <div class="avatar-wrapper">
+                {% if profile_user.avatar and profile_user.avatar.url %}
+                    <img src="{{ profile_user.avatar.url }}" alt="{{ profile_user.username }}" class="avatar">
+                {% else %}
+                    <img src="{% static 'images/default-avatar.png' %}" alt="{{ profile_user.username }}" class="avatar">
+                {% endif %}
+                {% if profile_user.is_verified %}
+                    <span class="verified-badge">
+                        <i class="fas fa-check-circle"></i>
+                    </span>
+                {% endif %}
+                {% if user == profile_user %}
+                    <a href="{% url 'users:profile_edit' user.username %}" class="edit-avatar-btn">
+                        <i class="fas fa-camera"></i>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- User Info -->
+        <div class="user-info-section">
+            <div class="user-name-row">
+                <h1 class="user-name">{{ profile_user.username }}</h1>
+                {% if profile_user.is_verified %}
+                    <span class="verified-tag">Verified</span>
+                {% endif %}
+            </div>
+            
+            {% if profile_user.bio %}
+                <div class="user-bio">{{ profile_user.bio }}</div>
+            {% endif %}
+
+            <div class="user-details">
+                {% if profile_user.location %}
+                    <span class="detail-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        {{ profile_user.location }}
+                    </span>
+                {% endif %}
+                
+                {% if profile_user.website %}
+                    <span class="detail-item">
+                        <i class="fas fa-link"></i>
+                        <a href="{{ profile_user.website }}" target="_blank">{{ profile_user.website|truncatechars:30 }}</a>
+                    </span>
+                {% endif %}
+                
+                <span class="detail-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    Joined {{ profile_user.date_joined|date:"F Y" }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            {% if user.is_authenticated %}
+                {% if user == profile_user %}
+                    <a href="{% url 'users:profile_edit' user.username %}" class="btn btn-outline">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </a>
+                {% else %}
+                    <a href="{% url 'users:follow' profile_user.username %}" 
+                       class="btn {% if is_following %}btn-outline{% else %}btn-primary{% endif %}">
+                        <i class="fas fa-{% if is_following %}user-minus{% else %}user-plus{% endif %}"></i>
+                        {% if is_following %}Unfollow{% else %}Follow{% endif %}
+                    </a>
+                    
+                    {% if conversation %}
+                        <a href="{% url 'chat:conversation' conversation.id %}" class="btn btn-outline">
+                            <i class="fas fa-comment"></i> Message
+                        </a>
+                    {% else %}
+                        <a href="{% url 'chat:start' profile_user.username %}" class="btn btn-outline">
+                            <i class="fas fa-comment"></i> Message
+                        </a>
+                    {% endif %}
+                    
+                    <a href="{% url 'interactions:tip' profile_user.username %}" class="btn btn-warning">
+                        <i class="fas fa-coins"></i> Tip
+                    </a>
+                {% endif %}
+            {% else %}
+                <a href="{% url 'account_login' %}?next={{ request.path }}" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i> Follow
+                </a>
+                <a href="{% url 'account_login' %}?next={{ request.path }}" class="btn btn-outline">
+                    <i class="fas fa-comment"></i> Message
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon videos">
+                    <i class="fas fa-video"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-value">{{ videos.paginator.count }}</span>
+                    <span class="stat-label">Videos</span>
+                </div>
+            </div>
+            
+            <a href="{% url 'users:followers' profile_user.username %}" class="stat-card">
+                <div class="stat-icon followers">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-value">{{ followers_count }}</span>
+                    <span class="stat-label">Followers</span>
+                </div>
+            </a>
+            
+            <a href="{% url 'users:following' profile_user.username %}" class="stat-card">
+                <div class="stat-icon following">
+                    <i class="fas fa-user-friends"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-value">{{ following_count }}</span>
+                    <span class="stat-label">Following</span>
+                </div>
+            </a>
+            
+            <div class="stat-card">
+                <div class="stat-icon views">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-value">{{ profile_user.total_views }}</span>
+                    <span class="stat-label">Views</span>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon likes">
+                    <i class="fas fa-heart"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-value">{{ profile_user.total_likes }}</span>
+                    <span class="stat-label">Likes</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Followers Carousel -->
+    {% if followers %}
+    <div class="followers-carousel-section">
+        <div class="section-header">
+            <h5 class="section-title">
+                <i class="fas fa-users me-2"></i>
+                Recent Followers
+            </h5>
+            <a href="{% url 'users:followers' profile_user.username %}" class="view-all">
+                View All <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        
+        <div class="followers-carousel">
+            {% for follow in followers %}
+            <a href="{% url 'users:profile' follow.follower.username %}" class="follower-card">
+                <div class="follower-avatar">
+                    {% if follow.follower.avatar and follow.follower.avatar.url %}
+                        <img src="{{ follow.follower.avatar.url }}" alt="{{ follow.follower.username }}">
+                    {% else %}
+                        <img src="{% static 'images/default-avatar.png' %}" alt="{{ follow.follower.username }}">
+                    {% endif %}
+                    {% if follow.follower.is_verified %}
+                        <span class="mini-verified">✓</span>
+                    {% endif %}
+                </div>
+                <span class="follower-username">{{ follow.follower.username|truncatechars:12 }}</span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Content Tabs -->
+    <div class="content-tabs-section">
+        <div class="tabs-header">
+            <button class="tab-btn active" data-tab="videos">
+                <i class="fas fa-video me-2"></i>
+                Videos
+            </button>
+            <button class="tab-btn" data-tab="about">
+                <i class="fas fa-info-circle me-2"></i>
+                About
+            </button>
+        </div>
+
+        <!-- Videos Tab -->
+        <div class="tab-pane active" id="videos-tab">
+            {% if videos %}
+                <div class="videos-grid">
+                    {% for video in videos %}
+                    <div class="video-card">
+                        <a href="{% url 'videos:detail' video.id %}" class="video-card__link">
+                            <div class="video-card__poster">
+                                {% if video.thumbnail %}
+                                    <img src="{{ video.thumbnail.url }}" alt="{{ video.title }}" loading="lazy">
+                                {% else %}
+                                    <div class="poster-placeholder">
+                                        <i class="fas fa-video"></i>
+                                    </div>
+                                {% endif %}
+                                {% if video.duration %}
+                                    <span class="video-duration">{{ video.formatted_duration }}</span>
+                                {% endif %}
+                                {% if video.privacy != 'public' %}
+                                    <span class="privacy-badge {{ video.privacy }}">
+                                        <i class="fas fa-{% if video.privacy == 'private' %}lock{% else %}link{% endif %}"></i>
+                                    </span>
+                                {% endif %}
+                            </div>
+                            <div class="video-card__content">
+                                <h3 class="video-card__title">{{ video.title|truncatechars:60 }}</h3>
+                                <div class="video-card__meta">
+                                    <span class="video-card__stats">
+                                        <span><i class="fas fa-eye"></i> {{ video.view_count }}</span>
+                                        <span><i class="fas fa-heart"></i> {{ video.likes_count }}</span>
+                                        <span><i class="fas fa-comment"></i> {{ video.comments_count }}</span>
+                                    </span>
+                                </div>
+                                <div class="video-date">{{ video.created_at|date:"M j, Y" }}</div>
+                            </div>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if videos.has_other_pages %}
+                <div class="pagination-wrapper">
+                    <nav class="pagination">
+                        <div class="pagination__group">
+                            {% if videos.has_previous %}
+                                <a href="?page={{ videos.previous_page_number }}" class="pagination__arrow">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            {% else %}
+                                <span class="pagination__arrow disabled">
+                                    <i class="fas fa-chevron-left"></i>
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <div class="pagination__numbers">
+                            {% for i in videos.paginator.page_range %}
+                                {% if videos.number == i %}
+                                    <span class="pagination__number active">{{ i }}</span>
+                                {% elif i > videos.number|add:'-3' and i < videos.number|add:'3' %}
+                                    <a href="?page={{ i }}" class="pagination__number">{{ i }}</a>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <div class="pagination__group">
+                            {% if videos.has_next %}
+                                <a href="?page={{ videos.next_page_number }}" class="pagination__arrow">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            {% else %}
+                                <span class="pagination__arrow disabled">
+                                    <i class="fas fa-chevron-right"></i>
+                                </span>
+                            {% endif %}
+                        </div>
+                    </nav>
+                    <div class="pagination__info">
+                        Page {{ videos.number }} of {{ videos.paginator.num_pages }}
+                    </div>
+                </div>
+                {% endif %}
+
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state__icon">
+                        <i class="fas fa-video-slash"></i>
+                    </div>
+                    <h3>No videos yet</h3>
+                    <p>This user hasn't uploaded any videos</p>
+                    {% if user == profile_user %}
+                        <a href="{% url 'videos:upload' %}" class="btn btn-primary">
+                            <i class="fas fa-cloud-upload-alt"></i> Upload Your First Video
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- About Tab -->
+        <div class="tab-pane" id="about-tab">
+            <div class="about-grid">
+                <div class="about-card">
+                    <h3><i class="fas fa-user-circle"></i> Bio</h3>
+                    <p>{{ profile_user.bio|default:"No bio provided."|linebreaks }}</p>
+                </div>
+
+                <div class="about-card">
+                    <h3><i class="fas fa-info-circle"></i> Details</h3>
+                    <ul class="details-list">
+                        <li>
+                            <span class="detail-label">Username</span>
+                            <span class="detail-value">{{ profile_user.username }}</span>
+                        </li>
+                        <li>
+                            <span class="detail-label">Display Name</span>
+                            <span class="detail-value">{{ profile_user.get_full_name|default:"—" }}</span>
+                        </li>
+                        <li>
+                            <span class="detail-label">Email</span>
+                            <span class="detail-value">{{ profile_user.email }}</span>
+                        </li>
+                        <li>
+                            <span class="detail-label">Joined</span>
+                            <span class="detail-value">{{ profile_user.date_joined|date:"F j, Y" }}</span>
+                        </li>
+                        {% if profile_user.location %}
+                        <li>
+                            <span class="detail-label">Location</span>
+                            <span class="detail-value">{{ profile_user.location }}</span>
+                        </li>
+                        {% endif %}
+                        {% if profile_user.website %}
+                        <li>
+                            <span class="detail-label">Website</span>
+                            <span class="detail-value">
+                                <a href="{{ profile_user.website }}" target="_blank">{{ profile_user.website }}</a>
+                            </span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                <div class="about-card">
+                    <h3><i class="fas fa-chart-line"></i> Statistics</h3>
+                    <ul class="stats-list">
+                        <li>
+                            <span class="stat-label">Total Views</span>
+                            <span class="stat-value">{{ profile_user.total_views }}</span>
+                        </li>
+                        <li>
+                            <span class="stat-label">Total Likes</span>
+                            <span class="stat-value">{{ profile_user.total_likes }}</span>
+                        </li>
+                        <li>
+                            <span class="stat-label">Total Videos</span>
+                            <span class="stat-value">{{ videos.paginator.count }}</span>
+                        </li>
+                        <li>
+                            <span class="stat-label">Followers</span>
+                            <span class="stat-value">{{ followers_count }}</span>
+                        </li>
+                        <li>
+                            <span class="stat-label">Following</span>
+                            <span class="stat-value">{{ following_count }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Tab switching
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        
+        this.classList.add('active');
+        
+        const tabName = this.dataset.tab;
+        document.getElementById(`${tabName}-tab`).classList.add('active');
+    });
+});
+</script>
+{% endblock %}

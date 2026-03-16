@@ -1,0 +1,904 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}vidstream - Share your passion through video{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ====================================
+   Home Page - JustWatch Style
+   ==================================== */
+
+.home-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+}
+
+/* Content Header - Like Video List */
+.content-header {
+    padding: 2rem 0 1rem;
+}
+
+.content-header__text-block h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.content-header__text-block p {
+    font-size: 1rem;
+    color: var(--text-secondary);
+}
+
+/* Hero Section - Simplified */
+.hero-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 3rem 2rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.hero-content {
+    max-width: 600px;
+    position: relative;
+    z-index: 1;
+}
+
+.hero-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+}
+
+.hero-highlight {
+    color: var(--accent);
+}
+
+.hero-description {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+/* Section Headers - Like Video List */
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.section-header__left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.section-title i {
+    color: var(--accent);
+    margin-right: 0.5rem;
+}
+
+.section-count {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    background: var(--bg-hover);
+    padding: 0.3rem 0.75rem;
+    border-radius: 30px;
+    border: 1px solid var(--border);
+}
+
+.section-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.section-link:hover {
+    gap: 0.75rem;
+}
+
+/* Video Grid - Like Video List */
+.video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.video-card {
+    transition: transform 0.2s;
+}
+
+.video-card:hover {
+    transform: translateY(-4px);
+}
+
+.video-card__link {
+    text-decoration: none;
+    display: block;
+}
+
+.video-card__poster {
+    position: relative;
+    aspect-ratio: 2/3;
+    background: var(--bg-hover);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.video-card__poster img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.video-card:hover .video-card__poster img {
+    transform: scale(1.05);
+}
+
+.poster-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--bg-hover), var(--bg-card));
+    color: var(--text-secondary);
+    font-size: 2rem;
+}
+
+.video-duration {
+    position: absolute;
+    bottom: 0.5rem;
+    right: 0.5rem;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    z-index: 2;
+    backdrop-filter: blur(4px);
+}
+
+.video-card__content {
+    padding: 0.25rem 0;
+}
+
+.video-card__title {
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--text-primary);
+    margin: 0 0 0.5rem 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.video-card__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.video-author {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.author-avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.author-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.video-card__stats {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.video-card__stats i {
+    margin-right: 0.2rem;
+    font-size: 0.75rem;
+}
+
+.video-card__stats .fa-eye {
+    color: var(--text-secondary);
+}
+
+.video-card__stats .fa-heart {
+    color: #ef4444;
+}
+
+/* Features Grid */
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.feature-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.feature-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+}
+
+.feature-icon {
+    width: 64px;
+    height: 64px;
+    background: rgba(139, 92, 246, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: var(--accent);
+    font-size: 1.5rem;
+}
+
+.feature-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+}
+
+.feature-description {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Categories Grid */
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.category-card {
+    display: block;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.category-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+}
+
+.category-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(139, 92, 246, 0.1);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+    color: var(--accent);
+    font-size: 1.1rem;
+}
+
+.category-name {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.category-description {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* Creators Grid */
+.creators-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.creator-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.creator-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+}
+
+.creator-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid var(--border);
+    transition: border-color 0.2s;
+}
+
+.creator-card:hover .creator-avatar {
+    border-color: var(--accent);
+}
+
+.creator-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.creator-info {
+    flex: 1;
+}
+
+.creator-name {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.creator-stats {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* Empty State - Like Video List */
+.empty-state {
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 3rem;
+    margin: 2rem 0;
+}
+
+.empty-state__content i {
+    font-size: 3rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+.empty-state__content h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.empty-state__content p {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+}
+
+.empty-state__actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+/* CTA Section */
+.cta-section {
+    margin: 3rem 0;
+}
+
+.cta-card {
+    background: linear-gradient(135deg, var(--bg-card), var(--bg-hover));
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 3rem;
+    text-align: center;
+}
+
+.cta-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.cta-description {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Buttons - Like Video List */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+}
+
+.btn-outline:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-2px);
+}
+
+.btn-large {
+    padding: 1rem 2.5rem;
+    font-size: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 992px) {
+    .video-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .home-container {
+        padding: 1rem;
+    }
+
+    .hero-section {
+        padding: 2rem 1.5rem;
+    }
+
+    .hero-title {
+        font-size: 2rem;
+    }
+
+    .hero-description {
+        font-size: 1rem;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .features-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .categories-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+
+    .creators-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .empty-state__actions {
+        flex-direction: column;
+    }
+
+    .cta-card {
+        padding: 2rem 1.5rem;
+    }
+
+    .cta-title {
+        font-size: 1.5rem;
+    }
+
+    .cta-description {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-title {
+        font-size: 1.75rem;
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .video-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+
+    .video-card__title {
+        font-size: 0.9rem;
+    }
+
+    .video-card__stats {
+        font-size: 0.7rem;
+        gap: 0.5rem;
+    }
+
+    .categories-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .empty-state {
+        padding: 2rem;
+    }
+
+    .empty-state__content i {
+        font-size: 2.5rem;
+    }
+
+    .empty-state__content h2 {
+        font-size: 1.25rem;
+    }
+
+    .cta-card {
+        padding: 1.5rem 1rem;
+    }
+
+    .cta-title {
+        font-size: 1.25rem;
+    }
+
+    .btn-large {
+        padding: 0.75rem 1.5rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="home-container">
+    <!-- Hero Section - Simplified -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                Share your <span class="hero-highlight">passion</span> through video
+            </h1>
+            <p class="hero-description">
+                A community-driven platform where great content rises through viewer support. 
+                Discover videos curated by real people, not algorithms.
+            </p>
+            <div class="hero-actions">
+                {% if not user.is_authenticated %}
+                    <a href="{% url 'account_signup' %}" class="btn btn-primary">Get started</a>
+                    <a href="{% url 'account_login' %}" class="btn btn-outline">Sign in</a>
+                {% else %}
+                    <a href="{% url 'videos:upload' %}" class="btn btn-primary">Upload video</a>
+                    <a href="{% url 'videos:list' %}" class="btn btn-outline">Browse library</a>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Videos Section -->
+    {% if featured_videos %}
+    <section class="featured-section">
+        <div class="section-header">
+            <div class="section-header__left">
+                <h2 class="section-title">
+                    <i class="fas fa-play-circle"></i>
+                    Latest videos
+                </h2>
+                <span class="section-count">{{ featured_videos|length }} titles</span>
+            </div>
+            <a href="{% url 'videos:list' %}" class="section-link">
+                View all <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+
+        <div class="video-grid">
+            {% for video in featured_videos %}
+            <div class="video-card">
+                <a href="{% url 'videos:detail' video.id %}" class="video-card__link">
+                    <div class="video-card__poster">
+                        {% if video.thumbnail %}
+                            <img src="{{ video.thumbnail.url }}" alt="{{ video.title }}" loading="lazy">
+                        {% else %}
+                            <div class="poster-placeholder">
+                                <i class="fas fa-video"></i>
+                            </div>
+                        {% endif %}
+                        {% if video.duration %}
+                            <span class="video-duration">{{ video.formatted_duration }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="video-card__content">
+                        <h3 class="video-card__title">{{ video.title|truncatechars:60 }}</h3>
+                        <div class="video-card__meta">
+                            <span class="video-author">
+                                <span class="author-avatar">
+                                    {% if video.user.avatar %}
+                                        <img src="{{ video.user.avatar.url }}" alt="{{ video.user.username }}">
+                                    {% else %}
+                                        <img src="{% static 'images/default-avatar.png' %}" alt="{{ video.user.username }}">
+                                    {% endif %}
+                                </span>
+                                {{ video.user.username }}
+                            </span>
+                        </div>
+                        <div class="video-card__stats">
+                            <span><i class="fas fa-eye"></i> {{ video.view_count }}</span>
+                            <span><i class="fas fa-heart"></i> {{ video.likes_count }}</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- How It Works Section -->
+    <section class="how-it-works">
+        <div class="section-header">
+            <div class="section-header__left">
+                <h2 class="section-title">
+                    <i class="fas fa-info-circle"></i>
+                    How it works
+                </h2>
+            </div>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-upload"></i>
+                </div>
+                <h3 class="feature-title">Upload your content</h3>
+                <p class="feature-description">
+                    Share your videos with the world. Whether you're a creator or just sharing moments, your content matters.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3 class="feature-title">Build your audience</h3>
+                <p class="feature-description">
+                    Grow your community organically. Viewers subscribe to creators they genuinely enjoy.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-hand-holding-heart"></i>
+                </div>
+                <h3 class="feature-title">Get supported</h3>
+                <p class="feature-description">
+                    Receive direct support from viewers who appreciate your work through tipping.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories Section -->
+    {% if categories %}
+    <section class="categories-section">
+        <div class="section-header">
+            <div class="section-header__left">
+                <h2 class="section-title">
+                    <i class="fas fa-folder"></i>
+                    Categories
+                </h2>
+                <span class="section-count">{{ categories|length }} total</span>
+            </div>
+        </div>
+
+        <div class="categories-grid">
+            {% for category in categories %}
+            <a href="{% url 'videos:list' %}?category={{ category.id }}" class="category-card">
+                <div class="category-icon">
+                    {% if category.icon %}
+                        <i class="fas fa-{{ category.icon }}"></i>
+                    {% else %}
+                        <i class="fas fa-folder"></i>
+                    {% endif %}
+                </div>
+                <h3 class="category-name">{{ category.name }}</h3>
+                {% if category.description %}
+                    <p class="category-description">{{ category.description|truncatechars:50 }}</p>
+                {% endif %}
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Top Creators Section -->
+    {% if top_creators %}
+    <section class="creators-section">
+        <div class="section-header">
+            <div class="section-header__left">
+                <h2 class="section-title">
+                    <i class="fas fa-star"></i>
+                    Top creators
+                </h2>
+            </div>
+        </div>
+
+        <div class="creators-grid">
+            {% for creator in top_creators %}
+            <a href="{% url 'users:profile' creator.username %}" class="creator-card">
+                <div class="creator-avatar">
+                    {% if creator.avatar %}
+                        <img src="{{ creator.avatar.url }}" alt="{{ creator.username }}">
+                    {% else %}
+                        <img src="{% static 'images/default-avatar.png' %}" alt="{{ creator.username }}">
+                    {% endif %}
+                </div>
+                <div class="creator-info">
+                    <h4 class="creator-name">{{ creator.username }}</h4>
+                    <p class="creator-stats">{{ creator.total_followers }} followers</p>
+                </div>
+            </a>
+            {% empty %}
+            <div class="empty-state">
+                <div class="empty-state__content">
+                    <i class="fas fa-users"></i>
+                    <p>No creators to display yet.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Empty State - No Videos -->
+    {% if not featured_videos %}
+    <section class="empty-state">
+        <div class="empty-state__content">
+            <i class="fas fa-video"></i>
+            <h2>Start sharing your videos</h2>
+            <p>Be the first to upload content and build your audience. Viewers can support your work through direct tipping.</p>
+            {% if user.is_authenticated %}
+                <a href="{% url 'videos:upload' %}" class="btn btn-primary">Upload your first video</a>
+            {% else %}
+                <div class="empty-state__actions">
+                    <a href="{% url 'account_signup' %}" class="btn btn-primary">Create account</a>
+                    <a href="{% url 'account_login' %}" class="btn btn-outline">Sign in</a>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="cta-card">
+            <h2 class="cta-title">Join the community</h2>
+            <p class="cta-description">
+                Build genuine connections with viewers who value your content. Receive direct support through community tipping.
+            </p>
+            {% if not user.is_authenticated %}
+                <a href="{% url 'account_signup' %}" class="btn btn-primary btn-large">Get started</a>
+            {% else %}
+                <a href="{% url 'videos:upload' %}" class="btn btn-primary btn-large">Start creating</a>
+            {% endif %}
+        </div>
+    </section>
+</div>
+{% endblock %}

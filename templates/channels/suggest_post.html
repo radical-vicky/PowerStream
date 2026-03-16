@@ -1,0 +1,907 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Suggest Post to {{ channel.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ====================================
+   Suggest Post Page - Professional Design
+   ==================================== */
+
+.suggest-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+}
+
+/* Header Section */
+.page-header {
+    margin-bottom: 2rem;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+    transition: all 0.2s;
+}
+
+.back-link:hover {
+    color: var(--accent);
+    transform: translateX(-3px);
+}
+
+.page-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.channel-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 30px;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    margin-left: 0.5rem;
+    transition: all 0.2s;
+}
+
+.channel-badge:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.channel-badge img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.page-header p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+/* Suggest Card */
+.suggest-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Card Header */
+.card-header {
+    background: linear-gradient(135deg, var(--accent), #6d28d9);
+    padding: 2rem;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.card-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transform: rotate(25deg);
+}
+
+.card-header::after {
+    content: '';
+    position: absolute;
+    bottom: -50%;
+    left: -10%;
+    width: 300px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transform: rotate(-15deg);
+}
+
+.card-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.card-header p {
+    font-size: 0.95rem;
+    opacity: 0.9;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+
+/* Card Body */
+.card-body {
+    padding: 2rem;
+}
+
+/* Info Alert */
+.info-alert {
+    background: rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: 16px;
+    padding: 1.25rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.info-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(139, 92, 246, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.info-content {
+    flex: 1;
+}
+
+.info-content h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.info-content p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Form Groups */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+}
+
+.form-label i {
+    color: var(--accent);
+    width: 20px;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 1rem;
+    color: var(--accent);
+    font-size: 0.95rem;
+    opacity: 0.7;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.875rem 1rem 0.875rem 2.5rem;
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    background: var(--bg-hover);
+}
+
+.form-input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.5;
+}
+
+textarea.form-input {
+    padding-left: 1rem;
+    resize: vertical;
+    min-height: 120px;
+}
+
+/* Content Type Selector */
+.content-type-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.content-type-option {
+    position: relative;
+}
+
+.content-type-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.content-type-card {
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.content-type-option input[type="radio"]:checked + .content-type-card {
+    border-color: var(--accent);
+    background: rgba(139, 92, 246, 0.05);
+    box-shadow: 0 5px 20px rgba(139, 92, 246, 0.2);
+}
+
+.content-type-option input[type="radio"]:checked + .content-type-card .type-icon {
+    background: var(--accent);
+    color: white;
+}
+
+.type-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--bg-card);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: var(--accent);
+    transition: all 0.2s ease;
+}
+
+.type-icon.video {
+    color: var(--accent);
+}
+
+.type-icon.link {
+    color: #10b981;
+}
+
+.type-label {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+.type-desc {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+/* File Upload Area */
+.upload-area {
+    background: var(--bg-dark);
+    border: 2px dashed var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 0.5rem;
+}
+
+.upload-area:hover {
+    border-color: var(--accent);
+    background: rgba(139, 92, 246, 0.02);
+}
+
+.upload-area.dragover {
+    border-color: var(--accent);
+    background: rgba(139, 92, 246, 0.05);
+    transform: scale(1.02);
+}
+
+.upload-icon-wrapper {
+    width: 64px;
+    height: 64px;
+    background: rgba(139, 92, 246, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+}
+
+.upload-icon-wrapper i {
+    font-size: 1.75rem;
+    color: var(--accent);
+}
+
+.upload-text {
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.upload-hint {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.upload-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.file-info {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 1rem;
+    background: rgba(139, 92, 246, 0.1);
+    border-radius: 30px;
+    color: var(--accent);
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+}
+
+/* External Link Input */
+.link-input-wrapper {
+    display: flex;
+    align-items: center;
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.link-input-wrapper:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.link-prefix {
+    padding: 0.875rem 0 0.875rem 1rem;
+    color: var(--accent);
+    font-weight: 500;
+}
+
+.link-input {
+    flex: 1;
+    padding: 0.875rem 1rem 0.875rem 0;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+.link-input:focus {
+    outline: none;
+}
+
+/* Funding Input */
+.funding-wrapper {
+    display: flex;
+    align-items: center;
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.funding-wrapper:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.funding-prefix {
+    padding: 0.875rem 0 0.875rem 1rem;
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.funding-input {
+    flex: 1;
+    padding: 0.875rem 1rem 0.875rem 0.5rem;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+.funding-input:focus {
+    outline: none;
+}
+
+.funding-hint {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.funding-hint i {
+    color: var(--accent);
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+}
+
+.btn {
+    flex: 1;
+    padding: 1rem 2rem;
+    border-radius: 40px;
+    font-weight: 600;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent), #6d28d9);
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-primary:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px -5px rgba(139, 92, 246, 0.5);
+}
+
+.btn-secondary {
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .suggest-container {
+        margin: 1rem auto;
+        padding: 0 1rem;
+    }
+
+    .page-header h1 {
+        font-size: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .channel-badge {
+        margin-left: 0;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .content-type-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .card-header {
+        padding: 1.5rem;
+    }
+
+    .card-header h2 {
+        font-size: 1.25rem;
+    }
+
+    .info-alert {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .info-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="suggest-container">
+    <!-- Header Section -->
+    <div class="page-header">
+        <a href="{% url 'channels:detail' channel.slug %}" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to channel
+        </a>
+        <h1>
+            Suggest post to
+            <a href="{% url 'channels:detail' channel.slug %}" class="channel-badge">
+                {% if channel.avatar %}
+                    <img src="{{ channel.avatar.url }}" alt="{{ channel.name }}">
+                {% else %}
+                    <i class="fas fa-tv"></i>
+                {% endif %}
+                {{ channel.name }}
+            </a>
+        </h1>
+        <p>Share your content idea with the channel</p>
+    </div>
+
+    <!-- Suggest Card -->
+    <div class="suggest-card">
+        <div class="card-header">
+            <h2>
+                <i class="fas fa-lightbulb"></i>
+                New Suggestion
+            </h2>
+            <p>Fill in the details to suggest your content</p>
+        </div>
+
+        <div class="card-body">
+            <!-- Info Alert -->
+            <div class="info-alert">
+                <div class="info-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div class="info-content">
+                    <h4>How it works</h4>
+                    <p>Your suggestion will be reviewed by the channel owner. If approved, it will be published as a video. You'll be notified of the decision.</p>
+                </div>
+            </div>
+
+            <!-- Form -->
+            <form method="post" enctype="multipart/form-data" id="suggestForm">
+                {% csrf_token %}
+                
+                <!-- Title -->
+                <div class="form-group">
+                    <label for="title" class="form-label">
+                        <i class="fas fa-heading"></i>
+                        Post Title
+                    </label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-pencil-alt input-icon"></i>
+                        <input type="text" class="form-input" id="title" name="title" 
+                               placeholder="e.g., Amazing Gaming Montage" required>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="form-group">
+                    <label for="description" class="form-label">
+                        <i class="fas fa-align-left"></i>
+                        Description
+                    </label>
+                    <textarea class="form-input" id="description" name="description" 
+                              rows="4" placeholder="Describe your content idea in detail..." required></textarea>
+                </div>
+
+                <!-- Content Type -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-tag"></i>
+                        Content Type
+                    </label>
+                    <div class="content-type-grid">
+                        <div class="content-type-option">
+                            <input type="radio" name="content_type" id="content_video" value="video" checked>
+                            <label for="content_video" class="content-type-card">
+                                <div class="type-icon video">
+                                    <i class="fas fa-video"></i>
+                                </div>
+                                <span class="type-label">Upload Video</span>
+                                <span class="type-desc">Direct file upload</span>
+                            </label>
+                        </div>
+                        <div class="content-type-option">
+                            <input type="radio" name="content_type" id="content_link" value="link">
+                            <label for="content_link" class="content-type-card">
+                                <div class="type-icon link">
+                                    <i class="fas fa-link"></i>
+                                </div>
+                                <span class="type-label">External Link</span>
+                                <span class="type-desc">YouTube, Vimeo, etc.</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Video Upload Section -->
+                <div class="form-group" id="video-upload-section">
+                    <label class="form-label">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        Upload Video
+                    </label>
+                    <div class="upload-area" id="videoUpload">
+                        <div class="upload-icon-wrapper">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <p class="upload-text">Click or drag to upload your video</p>
+                        <p class="upload-hint">MP4, WebM, MOV (Max 100MB)</p>
+                        <input type="file" id="video_file" name="video_file" 
+                               accept="video/mp4,video/webm,video/quicktime" class="upload-input">
+                        <div id="videoFileInfo" class="file-info" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <!-- External Link Section -->
+                <div class="form-group d-none" id="link-section">
+                    <label for="external_link" class="form-label">
+                        <i class="fas fa-link"></i>
+                        External Link
+                    </label>
+                    <div class="link-input-wrapper">
+                        <span class="link-prefix"><i class="fas fa-globe"></i></span>
+                        <input type="url" class="link-input" id="external_link" name="external_link" 
+                               placeholder="https://youtube.com/watch?v=...">
+                    </div>
+                    <small class="funding-hint">
+                        <i class="fas fa-info-circle"></i>
+                        Supported platforms: YouTube, Vimeo, Dailymotion
+                    </small>
+                </div>
+
+                <!-- Funding Amount -->
+                <div class="form-group">
+                    <label for="funding_amount" class="form-label">
+                        <i class="fas fa-coins"></i>
+                        Funding Amount (Optional)
+                    </label>
+                    <div class="funding-wrapper">
+                        <span class="funding-prefix">$</span>
+                        <input type="number" class="funding-input" id="funding_amount" 
+                               name="funding_amount" min="1" step="0.01" placeholder="0.00">
+                    </div>
+                    <small class="funding-hint">
+                        <i class="fas fa-info-circle"></i>
+                        Offering funding can increase chances of approval
+                    </small>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <a href="{% url 'channels:detail' channel.slug %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i>
+                        Submit Suggestion
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Toggle between video upload and link
+const videoSection = document.getElementById('video-upload-section');
+const linkSection = document.getElementById('link-section');
+const videoFile = document.getElementById('video_file');
+const externalLink = document.getElementById('external_link');
+
+document.querySelectorAll('input[name="content_type"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        if (this.value === 'video') {
+            videoSection.classList.remove('d-none');
+            linkSection.classList.add('d-none');
+            externalLink.required = false;
+            videoFile.required = false;
+        } else {
+            videoSection.classList.add('d-none');
+            linkSection.classList.remove('d-none');
+            videoFile.required = false;
+            externalLink.required = true;
+        }
+    });
+});
+
+// Drag and drop handling
+const uploadArea = document.getElementById('videoUpload');
+if (uploadArea) {
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, preventDefaults, false);
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, unhighlight, false);
+    });
+
+    uploadArea.addEventListener('drop', handleDrop, false);
+}
+
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+function highlight() {
+    this.classList.add('dragover');
+}
+
+function unhighlight() {
+    this.classList.remove('dragover');
+}
+
+function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    const input = document.getElementById('video_file');
+    input.files = files;
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
+// Video file handling
+document.getElementById('video_file').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        // Validate file size (100MB limit)
+        if (file.size > 100 * 1024 * 1024) {
+            alert('File size must be less than 100MB');
+            this.value = '';
+            return;
+        }
+        
+        const fileInfo = document.getElementById('videoFileInfo');
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        fileInfo.innerHTML = `<i class="fas fa-check-circle"></i> ${file.name} (${sizeMB} MB)`;
+        fileInfo.style.display = 'inline-flex';
+        
+        // Update upload area text
+        document.querySelector('#videoUpload .upload-text').innerHTML = '<i class="fas fa-check" style="color: var(--success);"></i> Video ready';
+    }
+});
+
+// Form validation
+document.getElementById('suggestForm').addEventListener('submit', function(e) {
+    const title = document.getElementById('title').value.trim();
+    const description = document.getElementById('description').value.trim();
+    const contentType = document.querySelector('input[name="content_type"]:checked').value;
+    
+    if (!title || !description) {
+        e.preventDefault();
+        alert('Please fill in all required fields');
+        return;
+    }
+    
+    if (contentType === 'video') {
+        const videoFile = document.getElementById('video_file').files[0];
+        if (!videoFile) {
+            e.preventDefault();
+            alert('Please upload a video file');
+            return;
+        }
+    } else {
+        const externalLink = document.getElementById('external_link').value.trim();
+        if (!externalLink) {
+            e.preventDefault();
+            alert('Please enter an external link');
+            return;
+        }
+        
+        // Basic URL validation
+        try {
+            new URL(externalLink);
+        } catch {
+            e.preventDefault();
+            alert('Please enter a valid URL');
+            return;
+        }
+    }
+});
+
+// Auto-hide messages
+setTimeout(() => {
+    document.querySelectorAll('.alert').forEach(alert => {
+        alert.style.transition = 'opacity 0.5s';
+        alert.style.opacity = '0';
+        setTimeout(() => alert.remove(), 500);
+    });
+}, 5000);
+</script>
+{% endblock %}

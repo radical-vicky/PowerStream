@@ -1,0 +1,1085 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}vidstream{% endblock %}</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Video.js -->
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+    
+    {% block extra_head %}{% endblock %}
+    
+    <style>
+        /* ====================================
+           CSS Variables - JustWatch Style
+           ==================================== */
+        :root {
+            --bg-dark: {% if active_background and active_background.bg_type == 'color' and active_background.color %}{{ active_background.color }}{% else %}#0a0a0c{% endif %};
+            --bg-card: {% if active_background and active_background.card_bg_color %}{{ active_background.card_bg_color }}{% else %}#121214{% endif %};
+            --bg-hover: {% if active_background and active_background.hover_bg_color %}{{ active_background.hover_bg_color }}{% else %}#1a1a1e{% endif %};
+            --text-primary: {% if active_background and active_background.text_color %}{{ active_background.text_color }}{% else %}#ffffff{% endif %};
+            --text-secondary: {% if active_background and active_background.text_secondary_color %}{{ active_background.text_secondary_color }}{% else %}#9ca3af{% endif %};
+            --border: {% if active_background and active_background.border_color %}{{ active_background.border_color }}{% else %}#2a2a30{% endif %};
+            --accent: {% if active_background and active_background.accent_color %}{{ active_background.accent_color }}{% else %}#8b5cf6{% endif %};
+            --accent-hover: {% if active_background and active_background.accent_hover_color %}{{ active_background.accent_hover_color }}{% else %}#7c4dff{% endif %};
+            --accent-gradient: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --header-height: 72px;
+            --overlay-opacity: {% if active_background %}{{ active_background.overlay_opacity }}{% else %}0.5{% endif %};
+            --card-radius: 16px;
+            --card-radius-sm: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ====================================
+           Reset & Base Styles
+           ==================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            padding-top: var(--header-height);
+            min-height: 100vh;
+            position: relative;
+            font-size: 16px;
+        }
+
+        /* ====================================
+           Typography
+           ==================================== */
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 600;
+            line-height: 1.2;
+            color: var(--text-primary);
+        }
+
+        a {
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        a:hover {
+            color: var(--accent);
+        }
+
+        /* ====================================
+           Container - JustWatch Style
+           ==================================== */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1.5rem;
+            }
+        }
+
+        /* ====================================
+           Background Effects
+           ==================================== */
+        {% if active_background %}
+            {% if active_background.bg_type == 'image' and background_image_url %}
+                body {
+                    background-image: url('{{ background_image_url }}');
+                    background-size: cover;
+                    background-position: center;
+                    background-attachment: fixed;
+                }
+                
+                body::before {
+                    content: '';
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, var(--overlay-opacity));
+                    z-index: -1;
+                    pointer-events: none;
+                }
+            {% endif %}
+
+            {% if active_background.bg_type == 'video' and background_video_url %}
+                .video-background {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: -2;
+                    overflow: hidden;
+                }
+                
+                .video-background video {
+                    min-width: 100%;
+                    min-height: 100%;
+                    width: auto;
+                    height: auto;
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    object-fit: cover;
+                }
+                
+                .video-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, var(--overlay-opacity));
+                    z-index: -1;
+                    pointer-events: none;
+                }
+            {% endif %}
+        {% endif %}
+
+        /* ====================================
+           Navigation - JustWatch Style
+           ==================================== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background: rgba(10, 10, 12, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        .navbar.scrolled {
+            background: rgba(10, 10, 12, 0.98);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .navbar .container {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Logo */
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text-primary) !important;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        .navbar-brand:hover {
+            opacity: 0.9;
+        }
+
+        .navbar-brand i {
+            color: var(--accent);
+            font-size: 1.5rem;
+        }
+
+        .navbar-brand span {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Navigation Links */
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            margin: 0 1rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            color: var(--text-secondary) !important;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: var(--transition);
+            white-space: nowrap;
+            text-decoration: none;
+        }
+
+        .nav-link i {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            transition: color 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary) !important;
+            background: var(--bg-hover);
+        }
+
+        .nav-link:hover i {
+            color: var(--accent);
+        }
+
+        /* Search Form */
+        .search-form {
+            position: relative;
+            width: 320px;
+            margin: 0 0.5rem;
+        }
+
+        .search-input {
+            width: 100%;
+            height: 40px;
+            padding: 0 1rem 0 2.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: var(--bg-hover);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+
+        /* User Menu - Fixed Avatar */
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.5rem 0.25rem 0.25rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .user-menu:hover {
+            border-color: var(--accent);
+            background: var(--bg-hover);
+        }
+
+        .user-avatar-container {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+            border: 2px solid var(--accent);
+        }
+
+        .user-avatar {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .user-name {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            max-width: 80px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .user-chevron {
+            font-size: 12px;
+            color: var(--text-secondary);
+            transition: transform 0.2s;
+        }
+
+        .dropdown.active .user-chevron {
+            transform: rotate(180deg);
+        }
+
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.5rem 0.75rem;
+            color: var(--text-primary);
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .mobile-menu-toggle:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* Dropdown Menu */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            right: 0;
+            min-width: 240px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: var(--transition);
+        }
+
+        .dropdown.active .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-radius: 8px;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .dropdown-item i {
+            width: 1.25rem;
+            color: var(--accent);
+            font-size: 1rem;
+        }
+
+        .dropdown-item:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 0.5rem 0;
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 1.5rem;
+            height: 1.5rem;
+            padding: 0 0.25rem;
+            background: var(--accent);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 1rem;
+            margin-left: auto;
+        }
+
+        /* ====================================
+           Messages / Notifications
+           ==================================== */
+        .messages-container {
+            position: fixed;
+            top: calc(var(--header-height) + 1rem);
+            right: 1rem;
+            z-index: 9999;
+            max-width: 360px;
+        }
+
+        .alert {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+        }
+
+        .alert.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .alert.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        .alert.warning {
+            border-left: 4px solid var(--warning);
+        }
+
+        .alert.info {
+            border-left: 4px solid var(--accent);
+        }
+
+        .alert i {
+            font-size: 1.1rem;
+        }
+
+        .alert.success i { color: var(--success); }
+        .alert.error i { color: var(--danger); }
+        .alert.warning i { color: var(--warning); }
+        .alert.info i { color: var(--accent); }
+
+        .alert .btn-close {
+            margin-left: auto;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            transition: color 0.2s;
+        }
+
+        .alert .btn-close:hover {
+            color: var(--text-primary);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* ====================================
+           Main Content
+           ==================================== */
+        main {
+            min-height: calc(100vh - var(--header-height) - 300px);
+            padding: 2rem 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ====================================
+           Footer - JustWatch Style
+           ==================================== */
+        .footer {
+            background: var(--bg-dark);
+            border-top: 1px solid var(--border);
+            padding: 4rem 0 2rem;
+            margin-top: 4rem;
+            position: relative;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr repeat(4, 1fr);
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-brand {
+            max-width: 300px;
+        }
+
+        .footer-brand h5 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+
+        .footer-brand p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .social-links a:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-3px);
+        }
+
+        .footer-links h6 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .footer-links a {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            padding: 0.35rem 0;
+            transition: color 0.2s;
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent);
+            transform: translateX(5px);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        /* ====================================
+           Progress Bar
+           ==================================== */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: var(--accent-gradient);
+            z-index: 1001;
+            transition: width 0.2s ease;
+        }
+
+        /* ====================================
+           Utility Classes
+           ==================================== */
+        .text-secondary {
+            color: var(--text-secondary) !important;
+        }
+
+        .bg-card {
+            background-color: var(--bg-card) !important;
+        }
+
+        .border-custom {
+            border: 1px solid var(--border);
+        }
+
+        .rounded-lg {
+            border-radius: var(--card-radius);
+        }
+
+        .rounded-sm {
+            border-radius: var(--card-radius-sm);
+        }
+
+        /* ====================================
+           Animations
+           ==================================== */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        /* ====================================
+           Responsive Design
+           ==================================== */
+        @media (max-width: 1024px) {
+            .footer-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar .container {
+                padding: 0 1rem;
+            }
+
+            .mobile-menu-toggle {
+                display: block;
+            }
+
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: var(--header-height);
+                left: 1rem;
+                right: 1rem;
+                background: var(--bg-card);
+                border: 1px solid var(--border);
+                border-radius: var(--card-radius-sm);
+                padding: 0.5rem;
+                flex-direction: column;
+                align-items: stretch;
+                margin: 0.5rem 0 0;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .nav-link {
+                padding: 0.75rem;
+                justify-content: flex-start;
+            }
+
+            .search-form {
+                width: 180px;
+            }
+
+            .user-name {
+                display: none;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .footer-brand {
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .search-form {
+                width: 140px;
+            }
+
+            .messages-container {
+                max-width: calc(100% - 2rem);
+            }
+
+            .dropdown-menu {
+                position: fixed;
+                top: var(--header-height);
+                left: 1rem;
+                right: 1rem;
+                width: auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .search-form {
+                width: 120px;
+            }
+
+            .search-input {
+                padding: 0 1rem 0 2rem;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Progress Bar -->
+    <div class="progress-bar" id="progressBar"></div>
+
+    <!-- Video Background -->
+    {% if active_background and active_background.bg_type == 'video' and background_video_url %}
+        <div class="video-background">
+            <video autoplay muted loop playsinline id="bg-video">
+                <source src="{{ background_video_url }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        <div class="video-overlay"></div>
+    {% endif %}
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <i class="fas fa-play-circle"></i>
+                <span>vidstream</span>
+            </a>
+
+            <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <!-- Navigation Links -->
+            <div class="nav-links" id="navLinks">
+                <a class="nav-link" href="{% url 'videos:list' %}">
+                    <i class="fas fa-compass"></i>
+                    Browse
+                </a>
+                <a class="nav-link" href="{% url 'channels:list' %}">
+                    <i class="fas fa-tv"></i>
+                    Channels
+                </a>
+                {% if user.is_authenticated %}
+                    <a class="nav-link" href="{% url 'videos:upload' %}">
+                        <i class="fas fa-upload"></i>
+                        Upload
+                    </a>
+                {% endif %}
+            </div>
+
+            <!-- Search Form -->
+            <form class="search-form" action="{% url 'videos:list' %}" method="GET">
+                <i class="fas fa-search search-icon"></i>
+                <input class="search-input" type="search" name="q" 
+                       placeholder="Search videos..." value="{{ request.GET.q }}">
+            </form>
+
+            <!-- User Menu -->
+            {% if user.is_authenticated %}
+                <div class="dropdown" id="userDropdown">
+                    <a href="{% url 'users:profile' user.username %}" class="user-menu" data-toggle="dropdown">
+                        <div class="user-avatar-container">
+                            {% if user.avatar and user.avatar.url %}
+                                <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="user-avatar">
+                            {% else %}
+                                <img src="{% static 'images/default-avatar.png' %}" alt="{{ user.username }}" class="user-avatar">
+                            {% endif %}
+                        </div>
+                        <span class="user-name">{{ user.username|truncatechars:8 }}</span>
+                        <i class="fas fa-chevron-down user-chevron"></i>
+                    </a>
+                    
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="{% url 'users:profile' user.username %}">
+                            <i class="fas fa-user"></i>
+                            Profile
+                        </a>
+                        <a class="dropdown-item" href="{% url 'videos:my_videos' %}">
+                            <i class="fas fa-video"></i>
+                            My Videos
+                        </a>
+                        <a class="dropdown-item" href="{% url 'videos:liked' %}">
+                            <i class="fas fa-heart"></i>
+                            Liked Videos
+                        </a>
+                        <a class="dropdown-item" href="{% url 'channels:list' %}?owner={{ user.username }}">
+                            <i class="fas fa-tv"></i>
+                            My Channels
+                        </a>
+                        <a class="dropdown-item" href="{% url 'chat:inbox' %}">
+                            <i class="fas fa-envelope"></i>
+                            Messages
+                            <span class="badge" id="unreadCount" style="display: none;">0</span>
+                        </a>
+                        <a class="dropdown-item" href="{% url 'interactions:tipping_history' %}">
+                            <i class="fas fa-coins"></i>
+                            Tipping History
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{% url 'users:profile_edit' user.username %}">
+                            <i class="fas fa-cog"></i>
+                            Settings
+                        </a>
+                        <a class="dropdown-item" href="{% url 'account_logout' %}">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Logout
+                        </a>
+                    </div>
+                </div>
+            {% else %}
+                <div class="nav-links">
+                    <a class="nav-link" href="{% url 'account_login' %}">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Sign in
+                    </a>
+                    <a class="nav-link" href="{% url 'account_signup' %}">
+                        <i class="fas fa-user-plus"></i>
+                        Join
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert {{ message.tags }}">
+            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+            <span>{{ message }}</span>
+            <button class="btn-close" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <h5>vidstream</h5>
+                    <p>A community-driven platform where creators share their passion and viewers support the content they love.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-discord"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-links">
+                    <h6>Explore</h6>
+                    <a href="{% url 'videos:list' %}">Browse</a>
+                    <a href="{% url 'channels:list' %}">Channels</a>
+                    <a href="#">Trending</a>
+                    <a href="#">Categories</a>
+                </div>
+                
+                <div class="footer-links">
+                    <h6>Creator</h6>
+                    <a href="{% url 'videos:upload' %}">Upload</a>
+                    <a href="#">Guidelines</a>
+                    <a href="#">Community</a>
+                    <a href="#">Monetization</a>
+                </div>
+                
+                <div class="footer-links">
+                    <h6>Support</h6>
+                    <a href="#">Help</a>
+                    <a href="#">Contact</a>
+                    <a href="#">Terms</a>
+                    <a href="#">Privacy</a>
+                </div>
+                
+                <div class="footer-links">
+                    <h6>Connect</h6>
+                    <a href="#">Blog</a>
+                    <a href="#">Careers</a>
+                    <a href="#">Press</a>
+                    <a href="#">Partners</a>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; {% now "Y" %} vidstream. All rights reserved. Made with <i class="fas fa-heart" style="color: var(--danger);"></i> for creators</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Progress Bar
+        window.addEventListener('scroll', function() {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('progressBar').style.width = scrolled + '%';
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Mobile Menu Toggle
+        const menuToggle = document.getElementById('mobileMenuToggle');
+        const navLinks = document.getElementById('navLinks');
+
+        if (menuToggle && navLinks) {
+            menuToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                navLinks.classList.toggle('active');
+            });
+
+            // Close menu when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!navLinks.contains(event.target) && !menuToggle.contains(event.target)) {
+                    navLinks.classList.remove('active');
+                }
+            });
+        }
+
+        // Dropdown Toggle
+        const userMenu = document.querySelector('[data-toggle="dropdown"]');
+        const dropdown = document.getElementById('userDropdown');
+
+        if (userMenu && dropdown) {
+            userMenu.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropdown.classList.toggle('active');
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!dropdown.contains(e.target)) {
+                    dropdown.classList.remove('active');
+                }
+            });
+
+            // Prevent dropdown from closing when clicking inside
+            dropdown.querySelector('.dropdown-menu')?.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        }
+
+        // Auto-hide messages
+        setTimeout(function() {
+            document.querySelectorAll('.alert').forEach(function(alert) {
+                alert.style.transition = 'opacity 0.5s';
+                alert.style.opacity = '0';
+                setTimeout(function() { alert.remove(); }, 500);
+            });
+        }, 5000);
+
+        // Unread messages check
+        {% if user.is_authenticated %}
+        function checkUnreadMessages() {
+            fetch('/chat/ajax/unread/')
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.getElementById('unreadCount');
+                    if (data.unread_count > 0) {
+                        badge.textContent = data.unread_count;
+                        badge.style.display = 'inline-flex';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                })
+                .catch(error => console.error('Error checking unread messages:', error));
+        }
+        
+        checkUnreadMessages();
+        setInterval(checkUnreadMessages, 30000);
+        {% endif %}
+
+        // Video background handling
+        {% if active_background and active_background.bg_type == 'video' and background_video_url %}
+        const video = document.getElementById('bg-video');
+        if (video) {
+            video.play().catch(function(error) {
+                console.log('Video autoplay failed:', error);
+                video.muted = true;
+                video.play().catch(function(e) {
+                    console.log('Even muted autoplay failed:', e);
+                });
+            });
+        }
+        {% endif %}
+
+        // Fade in main content
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelector('main').classList.add('fade-in');
+        });
+    </script>
+
+    <!-- Video.js -->
+    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

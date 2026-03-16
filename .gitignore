@@ -1,0 +1,74 @@
+﻿# Media files - DO NOT COMMIT LARGE FILES
+media/
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+*.zip
+*.tar
+*.gz
+*.rar
+*.7z
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+env/
+ENV/
+*.log
+*.pot
+*.py[co]
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+
+# Django
+*.log
+*.pot
+*.pyc
+__pycache__/
+staticfiles/
+/media/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Media files
+media/
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+
+# Database
+*.sqlite3
+*.db
+
+
+# Python cache
+__pycache__/
+*.pyc
+
+
+# Virtual environment
+venv/
+env/
+

@@ -1,0 +1,887 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Send Tip to {{ recipient.username }} - vidstream{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ====================================
+   Send Tip Page - JustWatch Style
+   ==================================== */
+
+.tip-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+}
+
+/* Content Header */
+.content-header {
+    padding: 0 0 2rem;
+}
+
+.content-header__text-block h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.content-header__text-block p {
+    font-size: 1rem;
+    color: var(--text-secondary);
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+    transition: all 0.2s;
+}
+
+.back-link:hover {
+    color: var(--accent);
+    transform: translateX(-3px);
+}
+
+/* Tip Card */
+.tip-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+}
+
+/* User Info - Make entire section clickable */
+.user-section {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    transition: all 0.2s;
+}
+
+.user-section:hover {
+    transform: translateY(-2px);
+}
+
+.user-section:hover .user-avatar {
+    border-color: var(--accent);
+}
+
+.user-avatar-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+.user-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 3px solid var(--accent);
+    overflow: hidden;
+    background: var(--bg-dark);
+    margin: 0 auto;
+    transition: border-color 0.2s;
+}
+
+.user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.verified-badge {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--bg-card);
+}
+
+.verified-badge i {
+    font-size: 0.7rem;
+}
+
+.user-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    word-break: break-word;
+}
+
+.user-bio {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    max-width: 400px;
+    margin: 0 auto;
+    word-break: break-word;
+}
+
+/* Video Preview - Make entire section clickable */
+.video-preview {
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    transition: all 0.2s;
+}
+
+.video-preview a {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.video-preview:hover {
+    border-color: var(--accent);
+    background: var(--bg-hover);
+    transform: translateY(-2px);
+}
+
+.video-thumbnail {
+    width: 80px;
+    height: 50px;
+    border-radius: 4px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.video-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.video-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.video-info h6 {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    word-break: break-word;
+}
+
+.video-info small {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+}
+
+.video-info i {
+    color: var(--accent);
+    font-size: 0.7rem;
+}
+
+/* Form Section */
+.form-section {
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-section__header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.form-section__header i {
+    color: var(--accent);
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.form-section__header h3 {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin: 0;
+    word-break: break-word;
+}
+
+/* Form Groups */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.form-label i {
+    color: var(--accent);
+    width: 18px;
+    margin-right: 0.25rem;
+    flex-shrink: 0;
+}
+
+/* Input Group */
+.input-group {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+}
+
+.input-group-text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.7rem 1rem;
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-right: none;
+    border-radius: 8px 0 0 8px;
+    color: var(--accent);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.form-input {
+    flex: 1;
+    padding: 0.7rem 1rem;
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-left: none;
+    border-radius: 0 8px 8px 0;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    min-width: 0;
+    width: 100%;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.1);
+}
+
+.form-hint {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+/* Quick Amount Buttons */
+.quick-amounts {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+}
+
+.quick-amount-btn {
+    padding: 0.5rem 1rem;
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 30px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 50px;
+}
+
+.quick-amount-btn:hover {
+    background: var(--bg-hover);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* Textarea */
+.form-textarea {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.1);
+}
+
+.form-textarea::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.5;
+}
+
+/* Payment Methods */
+.payment-methods {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.payment-option {
+    flex: 1;
+    min-width: 100px;
+}
+
+.payment-option input[type="radio"] {
+    display: none;
+}
+
+.payment-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.7rem 0.5rem;
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.85rem;
+}
+
+.payment-option input[type="radio"]:checked + .payment-card {
+    border-color: var(--accent);
+    background: rgba(139, 92, 246, 0.05);
+    color: var(--accent);
+}
+
+.payment-card i {
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.payment-card span {
+    font-size: 0.85rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent), #6d28d9);
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-primary:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(139, 92, 246, 0.3);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+}
+
+.btn-outline:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-2px);
+}
+
+/* Secure Note */
+.secure-note {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    text-align: center;
+    border-top: 1px solid var(--border);
+}
+
+.secure-note small {
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+}
+
+.secure-note i {
+    color: var(--accent);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .tip-container {
+        padding: 0.75rem;
+        margin: 1rem auto;
+    }
+
+    .content-header__text-block h1 {
+        font-size: 1.75rem;
+    }
+
+    .tip-card {
+        padding: 1.25rem;
+    }
+
+    .user-section {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+    }
+
+    .user-avatar {
+        width: 80px;
+        height: 80px;
+    }
+
+    .verified-badge {
+        width: 22px;
+        height: 22px;
+    }
+
+    .user-name {
+        font-size: 1.1rem;
+    }
+
+    .user-bio {
+        font-size: 0.85rem;
+    }
+
+    .video-preview a {
+        flex-direction: column;
+        text-align: center;
+        padding: 1rem;
+    }
+
+    .video-thumbnail {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 16/9;
+        max-width: 200px;
+        margin: 0 auto;
+    }
+
+    .video-info {
+        width: 100%;
+    }
+
+    .form-section {
+        padding: 1.25rem;
+    }
+
+    .form-section__header h3 {
+        font-size: 1rem;
+    }
+
+    .quick-amounts {
+        justify-content: center;
+    }
+
+    .quick-amount-btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+        min-width: 45px;
+    }
+
+    .payment-methods {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .payment-option {
+        min-width: 100%;
+    }
+
+    .payment-card {
+        padding: 0.6rem;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .btn {
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .tip-container {
+        padding: 0.5rem;
+    }
+
+    .content-header__text-block h1 {
+        font-size: 1.5rem;
+    }
+
+    .back-link {
+        font-size: 0.85rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .tip-card {
+        padding: 1rem;
+    }
+
+    .user-section {
+        margin-bottom: 1.25rem;
+        padding-bottom: 1.25rem;
+    }
+
+    .user-avatar {
+        width: 70px;
+        height: 70px;
+    }
+
+    .verified-badge {
+        width: 20px;
+        height: 20px;
+        font-size: 0.6rem;
+    }
+
+    .user-name {
+        font-size: 1rem;
+    }
+
+    .user-bio {
+        font-size: 0.8rem;
+    }
+
+    .form-section {
+        padding: 1rem;
+    }
+
+    .form-section__header {
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+    }
+
+    .form-section__header i {
+        font-size: 1rem;
+    }
+
+    .form-section__header h3 {
+        font-size: 0.95rem;
+    }
+
+    .form-label {
+        font-size: 0.85rem;
+    }
+
+    .input-group-text {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9rem;
+    }
+
+    .form-input {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9rem;
+    }
+
+    .quick-amount-btn {
+        padding: 0.35rem 0.7rem;
+        font-size: 0.75rem;
+        min-width: 40px;
+    }
+
+    .payment-card {
+        padding: 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .payment-card i {
+        font-size: 0.9rem;
+    }
+
+    .payment-card span {
+        font-size: 0.8rem;
+    }
+
+    .btn {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.85rem;
+    }
+
+    .secure-note small {
+        font-size: 0.75rem;
+    }
+}
+
+/* Extra small devices */
+@media (max-width: 360px) {
+    .quick-amounts {
+        gap: 0.35rem;
+    }
+
+    .quick-amount-btn {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.7rem;
+        min-width: 35px;
+    }
+
+    .payment-card {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="tip-container">
+    <!-- Page Header -->
+    <div class="content-header">
+        <a href="javascript:history.back()" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back
+        </a>
+        <div class="content-header__text-block">
+            <h1>Send Tip</h1>
+            <p class="text-secondary">Support {{ recipient.username }} with a tip</p>
+        </div>
+    </div>
+
+    <!-- Tip Card -->
+    <div class="tip-card">
+        <!-- User Info - Make entire section clickable -->
+        <a href="{% url 'users:profile' recipient.username %}" class="user-section">
+            <div class="user-avatar-wrapper">
+                <div class="user-avatar">
+                    {% if recipient.avatar and recipient.avatar.url %}
+                        <img src="{{ recipient.avatar.url }}" alt="{{ recipient.username }}">
+                    {% else %}
+                        <img src="{% static 'images/default-avatar.png' %}" alt="{{ recipient.username }}">
+                    {% endif %}
+                </div>
+                {% if recipient.is_verified %}
+                    <span class="verified-badge">
+                        <i class="fas fa-check"></i>
+                    </span>
+                {% endif %}
+            </div>
+            <h2 class="user-name">{{ recipient.username }}</h2>
+            {% if recipient.bio %}
+                <p class="user-bio">{{ recipient.bio|truncatechars:100 }}</p>
+            {% endif %}
+        </a>
+
+        <!-- Video Info (if tipping on a specific video) - Make entire section clickable -->
+        {% if video %}
+        <div class="video-preview">
+            <a href="{% url 'videos:detail' video.id %}">
+                <div class="video-thumbnail">
+                    <img src="{{ video.get_thumbnail_url }}" alt="{{ video.title }}">
+                </div>
+                <div class="video-info">
+                    <h6>{{ video.title|truncatechars:50 }}</h6>
+                    <small>
+                        <i class="fas fa-tag"></i>
+                        Tipping on this video
+                    </small>
+                </div>
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- Tip Form -->
+        <form method="post">
+            {% csrf_token %}
+            
+            <!-- Amount Section -->
+            <div class="form-section">
+                <div class="form-section__header">
+                    <i class="fas fa-dollar-sign"></i>
+                    <h3>Tip Amount</h3>
+                </div>
+
+                <div class="form-group">
+                    <label for="amount" class="form-label">
+                        <i class="fas fa-coins"></i>
+                        Amount (USD)
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input type="number" class="form-input" id="amount" name="amount" 
+                               min="1" step="0.01" placeholder="5.00" value="5" required>
+                    </div>
+                    <small class="form-hint">Minimum tip: $1.00</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Quick select</label>
+                    <div class="quick-amounts">
+                        <button type="button" class="quick-amount-btn" onclick="document.getElementById('amount').value='5'">$5</button>
+                        <button type="button" class="quick-amount-btn" onclick="document.getElementById('amount').value='10'">$10</button>
+                        <button type="button" class="quick-amount-btn" onclick="document.getElementById('amount').value='20'">$20</button>
+                        <button type="button" class="quick-amount-btn" onclick="document.getElementById('amount').value='50'">$50</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Message Section -->
+            <div class="form-section">
+                <div class="form-section__header">
+                    <i class="fas fa-comment"></i>
+                    <h3>Message (Optional)</h3>
+                </div>
+
+                <div class="form-group">
+                    <textarea class="form-textarea" id="message" name="message" 
+                              rows="3" placeholder="Say something nice..."></textarea>
+                </div>
+            </div>
+
+            <!-- Payment Method Section -->
+            <div class="form-section">
+                <div class="form-section__header">
+                    <i class="fas fa-credit-card"></i>
+                    <h3>Payment Method</h3>
+                </div>
+
+                <div class="payment-methods">
+                    <label class="payment-option">
+                        <input type="radio" name="payment_method" value="card" checked>
+                        <span class="payment-card">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Card</span>
+                        </span>
+                    </label>
+                    <label class="payment-option">
+                        <input type="radio" name="payment_method" value="paypal">
+                        <span class="payment-card">
+                            <i class="fab fa-paypal"></i>
+                            <span>PayPal</span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="javascript:history.back()" class="btn btn-outline">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i>
+                    Send Tip
+                </button>
+            </div>
+        </form>
+
+        <!-- Secure Note -->
+        <div class="secure-note">
+            <small>
+                <i class="fas fa-lock"></i>
+                Secure payment. You'll be charged immediately.
+            </small>
+        </div>
+    </div>
+</div>
+
+<script>
+// Quick amount select
+document.querySelectorAll('.quick-amount-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.getElementById('amount').value = this.textContent.replace('$', '');
+    });
+});
+
+// Form validation
+document.querySelector('form').addEventListener('submit', function(e) {
+    const amount = parseFloat(document.getElementById('amount').value);
+    if (isNaN(amount) || amount < 1) {
+        e.preventDefault();
+        alert('Please enter a valid amount of at least $1.00');
+    }
+});
+</script>
+{% endblock %}

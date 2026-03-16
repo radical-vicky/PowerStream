@@ -1,0 +1,705 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit {{ channel.name }} - vidstream{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="form-card">
+                <!-- Header -->
+                <div class="form-header">
+                    <a href="{% url 'channels:detail' channel.slug %}" class="back-link">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <div>
+                        <h4 class="form-title">Edit Channel</h4>
+                        <p class="form-subtitle">{{ channel.name }}</p>
+                    </div>
+                </div>
+
+                <!-- Current Channel Info Preview -->
+                <div class="channel-preview mb-4">
+                    <div class="preview-cover">
+                        {% if channel.cover_image %}
+                            <img src="{{ channel.cover_image.url }}" alt="{{ channel.name }}" id="coverPreview">
+                        {% else %}
+                            <div class="default-cover-preview" style="background: linear-gradient(135deg, var(--accent), #8b5cf6);">
+                                <span>Current Cover</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="preview-avatar">
+                        {% if channel.avatar %}
+                            <img src="{{ channel.avatar.url }}" alt="{{ channel.name }}" id="avatarPreview">
+                        {% else %}
+                            <div class="default-avatar-preview">
+                                {{ channel.name|first|upper }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Form -->
+                <form method="post" enctype="multipart/form-data" class="channel-form">
+                    {% csrf_token %}
+                    
+                    <!-- Channel Name -->
+                    <div class="form-group">
+                        <label for="name" class="form-label">
+                            <i class="fas fa-tag"></i>
+                            Channel Name
+                        </label>
+                        <input type="text" class="form-control" id="name" name="name" 
+                               value="{{ channel.name }}" required>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-group">
+                        <label for="description" class="form-label">
+                            <i class="fas fa-align-left"></i>
+                            Description
+                        </label>
+                        <textarea class="form-control" id="description" name="description" 
+                                  rows="4" required>{{ channel.description }}</textarea>
+                    </div>
+
+                    <!-- Current Avatar Display -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-camera"></i>
+                            Current Avatar
+                        </label>
+                        <div class="current-media">
+                            <div class="current-avatar">
+                                {% if channel.avatar %}
+                                    <img src="{{ channel.avatar.url }}" alt="{{ channel.name }}">
+                                {% else %}
+                                    <div class="default-avatar-display">
+                                        {{ channel.name|first|upper }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- New Avatar Upload -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-upload"></i>
+                            Change Avatar (Optional)
+                        </label>
+                        <div class="upload-area" id="avatarUpload">
+                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            <p class="upload-text">Click to upload new avatar</p>
+                            <p class="upload-hint">Leave empty to keep current</p>
+                            <input type="file" id="avatar" name="avatar" accept="image/*" class="upload-input">
+                            <div id="newAvatarPreview" class="upload-preview" style="display: none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Current Cover Display -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-image"></i>
+                            Current Cover
+                        </label>
+                        <div class="current-media">
+                            <div class="current-cover">
+                                {% if channel.cover_image %}
+                                    <img src="{{ channel.cover_image.url }}" alt="{{ channel.name }}">
+                                {% else %}
+                                    <div class="default-cover-display">
+                                        No cover image
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- New Cover Upload -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-upload"></i>
+                            Change Cover (Optional)
+                        </label>
+                        <div class="upload-area" id="coverUpload">
+                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            <p class="upload-text">Click to upload new cover</p>
+                            <p class="upload-hint">Leave empty to keep current</p>
+                            <input type="file" id="cover_image" name="cover_image" accept="image/*" class="upload-input">
+                            <div id="newCoverPreview" class="upload-preview" style="display: none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Private Option -->
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="is_private" name="is_private"
+                                   {% if channel.is_private %}checked{% endif %}>
+                            <label class="form-check-label" for="is_private">
+                                <i class="fas fa-lock"></i>
+                                Make channel private
+                            </label>
+                        </div>
+                        <small class="form-text">Private channels are only visible to subscribers</small>
+                    </div>
+
+                    <!-- Danger Zone -->
+                    <div class="danger-zone">
+                        <h6 class="danger-title">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Danger Zone
+                        </h6>
+                        <p class="danger-text">Once you delete your channel, there is no going back. Please be certain.</p>
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                            <i class="fas fa-trash-alt me-2"></i>Delete Channel
+                        </button>
+                    </div>
+
+                    <!-- Submit Buttons -->
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                        <a href="{% url 'channels:detail' channel.slug %}" class="btn btn-outline btn-lg">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Channel</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong>{{ channel.name }}</strong>?</p>
+                <p class="text-danger">This action cannot be undone. All videos and content will be permanently removed.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Cancel</button>
+                <form action="{% url 'channels:delete' channel.slug %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash-alt me-2"></i>Yes, Delete Channel
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.form-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.back-link {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.back-link:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateX(-3px);
+}
+
+.form-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    background: linear-gradient(135deg, #fff, #a0a0a0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.form-subtitle {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* Channel Preview */
+.channel-preview {
+    position: relative;
+    background: var(--bg-dark);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    border: 1px solid var(--border);
+}
+
+.preview-cover {
+    height: 150px;
+    overflow: hidden;
+}
+
+.preview-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.default-cover-preview {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 500;
+}
+
+.preview-avatar {
+    position: absolute;
+    bottom: -40px;
+    left: 30px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 4px solid var(--bg-card);
+    overflow: hidden;
+    background: var(--bg-card);
+}
+
+.preview-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.default-avatar-preview {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--accent), #8b5cf6);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 2.5rem;
+}
+
+/* Current Media Display */
+.current-media {
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.current-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.current-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.default-avatar-display {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--accent), #8b5cf6);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 2rem;
+    border-radius: 50%;
+}
+
+.current-cover {
+    width: 100%;
+    height: 120px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.current-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.default-cover-display {
+    width: 100%;
+    height: 100%;
+    background: var(--bg-card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+}
+
+/* Form Groups */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+}
+
+.form-label i {
+    color: var(--accent);
+    width: 20px;
+}
+
+.form-control {
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text-primary);
+    padding: 0.75rem 1rem;
+    width: 100%;
+    transition: all 0.2s;
+}
+
+.form-control:focus {
+    border-color: var(--accent);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+/* Upload Areas */
+.upload-area {
+    background: var(--bg-dark);
+    border: 2px dashed var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.upload-area:hover {
+    border-color: var(--accent);
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.upload-icon {
+    font-size: 2.5rem;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    opacity: 0.7;
+}
+
+.upload-text {
+    color: var(--text-primary);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.upload-hint {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.upload-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.upload-preview {
+    margin-top: 1rem;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.upload-preview img {
+    width: 100%;
+    max-height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+/* Form Check */
+.form-check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.form-check-input {
+    width: 18px;
+    height: 18px;
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.form-check-input:checked {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.form-check-label {
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-check-label i {
+    color: var(--accent);
+}
+
+/* Danger Zone */
+.danger-zone {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+}
+
+.danger-title {
+    color: #ef4444;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.danger-text {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.btn-danger {
+    background: #ef4444;
+    border: none;
+    color: white;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3);
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+}
+
+.btn {
+    flex: 1;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 500;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent), #2563eb);
+    border: none;
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+}
+
+.btn-outline:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-2px);
+}
+
+/* Modal */
+.modal-content {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+}
+
+.modal-header {
+    border-bottom-color: var(--border);
+    padding: 1.5rem;
+}
+
+.modal-title {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.modal-body {
+    padding: 1.5rem;
+    color: var(--text-secondary);
+}
+
+.modal-footer {
+    border-top-color: var(--border);
+    padding: 1.5rem;
+}
+
+.btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .form-card {
+        padding: 1.5rem;
+    }
+    
+    .form-title {
+        font-size: 1.25rem;
+    }
+    
+    .preview-avatar {
+        width: 80px;
+        height: 80px;
+        left: 20px;
+        bottom: -35px;
+    }
+    
+    .default-avatar-preview {
+        font-size: 2rem;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .btn-lg {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .preview-cover {
+        height: 120px;
+    }
+    
+    .preview-avatar {
+        width: 70px;
+        height: 70px;
+        left: 15px;
+        bottom: -30px;
+    }
+    
+    .default-avatar-preview {
+        font-size: 1.8rem;
+    }
+}
+</style>
+
+<script>
+// Avatar preview
+document.getElementById('avatar').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('newAvatarPreview');
+            preview.innerHTML = `<img src="${e.target.result}" alt="New avatar preview">`;
+            preview.style.display = 'block';
+            
+            // Update upload area
+            const uploadArea = document.getElementById('avatarUpload');
+            uploadArea.querySelector('.upload-text').textContent = file.name;
+            uploadArea.querySelector('.upload-hint').textContent = 'Click to change';
+        }
+        reader.readAsDataURL(file);
+    }
+});
+
+// Cover preview
+document.getElementById('cover_image').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('newCoverPreview');
+            preview.innerHTML = `<img src="${e.target.result}" alt="New cover preview">`;
+            preview.style.display = 'block';
+            
+            // Update upload area
+            const uploadArea = document.getElementById('coverUpload');
+            uploadArea.querySelector('.upload-text').textContent = file.name;
+            uploadArea.querySelector('.upload-hint').textContent = 'Click to change';
+        }
+        reader.readAsDataURL(file);
+    }
+});
+</script>
+{% endblock %}
