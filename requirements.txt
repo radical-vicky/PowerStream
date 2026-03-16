@@ -1,0 +1,32 @@
+# Core Django
+Django
+
+# Database
+psycopg2-binary
+dj-database-url
+
+# Authentication
+django-allauth
+
+# Forms & UI
+django-crispy-forms
+crispy-bootstrap5
+
+# Django Apps
+django-star-ratings
+django-hitcount
+
+# Media/Video handling
+Pillow
+
+# Production server
+gunicorn
+
+# Static files
+whitenoise
+
+# Environment variables
+python-dotenv
+
+# Optional but recommended
+django-debug-toolbar
