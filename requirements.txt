@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 # Core Django
 Django
@@ -31,3 +32,37 @@ python-dotenv
 
 # Optional but recommended
 django-debug-toolbar
+=======
+# Core Django
+Django
+
+# Database
+psycopg2-binary
+dj-database-url
+
+# Authentication
+django-allauth
+
+# Forms & UI
+django-crispy-forms
+crispy-bootstrap5
+
+# Django Apps
+django-star-ratings
+django-hitcount
+
+# Media/Video handling
+Pillow
+
+# Production server
+gunicorn
+
+# Static files
+whitenoise
+
+# Environment variables
+python-dotenv
+
+# Optional but recommended
+django-debug-toolbar
+>>>>>>> 285a18b92be12009f6954fe77d9ef1196de169dc
