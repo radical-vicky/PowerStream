@@ -1,5 +1,7 @@
 import os
 from pathlib import Path
+import dj_database_url
+import mimetypes
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -10,7 +12,13 @@ SECRET_KEY = 'django-insecure-kxfni-8k_(r%6ck!go46d$8i4@9_lrv!g4$*w0@k*l%log8a@x
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['powerstreamv.onrender.com','powerstream.onrender.com','powerstreamvideo.onrender.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = [
+    'powerstreamv.onrender.com',
+    'powerstream.onrender.com', 
+    'powerstreamvideo.onrender.com', 
+    'localhost', 
+    '127.0.0.1'
+]
 
 # Application definition
 INSTALLED_APPS = [
@@ -21,7 +29,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites', 
-     'django.contrib.sitemaps', # Required for allauth
+    'django.contrib.sitemaps',  # Required for allauth
     
     # Local apps
     'core',
@@ -30,6 +38,7 @@ INSTALLED_APPS = [
     'interactions',
     'channels',
     'chat', 
+    
     # Third-party apps
     'allauth',
     'allauth.account',
@@ -38,11 +47,11 @@ INSTALLED_APPS = [
     'crispy_bootstrap5',
     'star_ratings',
     'hitcount',
-    
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Add whitenoise for static files
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -50,7 +59,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
-    
 ]
 
 ROOT_URLCONF = 'video_platform.urls'
@@ -75,15 +83,22 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'video_platform.wsgi.application'
 
-import dj_database_url
-
-# Replace your existing DATABASES with this:
-DATABASES = {
-    'default': dj_database_url.config(
-        default='sqlite:///' + str(BASE_DIR / 'db.sqlite3'),
-        conn_max_age=600
-    )
-}
+# Database configuration
+# Use DATABASE_URL from environment if available (production), otherwise use SQLite (development)
+if os.environ.get('DATABASE_URL'):
+    DATABASES = {
+        'default': dj_database_url.config(
+            conn_max_age=600,
+            ssl_require=True  # Required for Render PostgreSQL
+        )
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -111,6 +126,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files
 MEDIA_URL = '/media/'
@@ -137,15 +153,21 @@ ACCOUNT_UNIQUE_EMAIL = True
 # Email verification settings
 if DEBUG:
     # Development: no email verification or console emails
-    ACCOUNT_EMAIL_VERIFICATION = 'optional'  # or 'none' to skip entirely
+    ACCOUNT_EMAIL_VERIFICATION = 'optional'
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 else:
     # Production: require email verification
     ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
     # Configure your actual email settings here
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+    EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 
 # Additional allauth settings
-ACCOUNT_LOGOUT_ON_GET = True  # Logout without confirmation page
+ACCOUNT_LOGOUT_ON_GET = True
 ACCOUNT_LOGOUT_REDIRECT_URL = '/'
 LOGIN_REDIRECT_URL = '/'
 ACCOUNT_SIGNUP_REDIRECT_URL = '/'
@@ -168,7 +190,6 @@ INTERNAL_IPS = [
 ]
 
 # Video settings
-import mimetypes
 mimetypes.add_type("video/mp4", ".mp4", True)
 mimetypes.add_type("video/webm", ".webm", True)
 
