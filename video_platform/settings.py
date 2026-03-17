@@ -10,7 +10,7 @@ SECRET_KEY = 'django-insecure-kxfni-8k_(r%6ck!go46d$8i4@9_lrv!g4$*w0@k*l%log8a@x
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['videos.onrender.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['powerstreamv.onrender.com','powerstream.onrender.com','powerstreamvideo.onrender.com', 'localhost', '127.0.0.1']
 
 # Application definition
 INSTALLED_APPS = [
@@ -84,6 +84,7 @@ DATABASES = {
         conn_max_age=600
     )
 }
+
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -173,5 +174,3 @@ mimetypes.add_type("video/webm", ".webm", True)
 
 # Custom user model
 AUTH_USER_MODEL = 'users.CustomUser'
-
-
