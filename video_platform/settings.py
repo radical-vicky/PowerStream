@@ -10,7 +10,7 @@ SECRET_KEY = 'django-insecure-kxfni-8k_(r%6ck!go46d$8i4@9_lrv!g4$*w0@k*l%log8a@x
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['videos.onrender.com', 'localhost', '127.0.0.1']
 
 # Application definition
 INSTALLED_APPS = [
@@ -75,14 +75,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'video_platform.wsgi.application'
 
-# Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+import dj_database_url
 
+# Replace your existing DATABASES with this:
+DATABASES = {
+    'default': dj_database_url.config(
+        default='sqlite:///' + str(BASE_DIR / 'db.sqlite3'),
+        conn_max_age=600
+    )
+}
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
