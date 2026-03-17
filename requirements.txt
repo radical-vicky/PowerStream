@@ -1,66 +1,12 @@
-
-# Core Django
-Django
-
-# Database
-psycopg2-binary
-dj-database-url
-
-# Authentication
-django-allauth
-
-# Forms & UI
-django-crispy-forms
-crispy-bootstrap5
-
-# Django Apps
-django-star-ratings
-django-hitcount
-
-# Media/Video handling
-Pillow
-
-# Production server
-gunicorn
-
-# Static files
-whitenoise
-
-# Environment variables
-python-dotenv
-
-# Optional but recommended
-django-debug-toolbar
-
-# Core Django
-Django
-
-# Database
-psycopg2-binary
-dj-database-url
-
-# Authentication
-django-allauth
-
-# Forms & UI
-django-crispy-forms
-crispy-bootstrap5
-
-# Django Apps
-django-star-ratings
-django-hitcount
-
-# Media/Video handling
-Pillow
-
-# Production server
-gunicorn
-
-# Static files
-whitenoise
-
-# Environment variables
-python-dotenv
-
-# Optional but recommended
-django-debug-toolbar
+Django>=4.2.0,<5.0
+gunicorn>=20.0.0
+psycopg2-binary>=2.9.0
+dj-database-url>=2.0.0
+django-allauth>=0.57.0
+django-crispy-forms>=2.0
+crispy-bootstrap5>=0.7
+django-star-ratings>=0.9.0
+django-hitcount>=1.3.0
+Pillow>=10.0.0
+whitenoise>=6.0.0
+python-dotenv>=1.0.0
