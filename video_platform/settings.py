@@ -12,7 +12,6 @@ SECRET_KEY = 'django-insecure-kxfni-8k_(r%6ck!go46d$8i4@9_lrv!g4$*w0@k*l%log8a@x
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-<<<<<<< HEAD
 ALLOWED_HOSTS = [
     'powerstreamv.onrender.com',
     'powerstream.onrender.com', 
@@ -20,9 +19,6 @@ ALLOWED_HOSTS = [
     'localhost', 
     '127.0.0.1'
 ]
-=======
-ALLOWED_HOSTS = ['powerstreamv.onrender.com','powerstream.onrender.com','powerstreamvideo.onrender.com', 'localhost', '127.0.0.1']
->>>>>>> 285a18b92be12009f6954fe77d9ef1196de169dc
 
 # Application definition
 INSTALLED_APPS = [
@@ -87,7 +83,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'video_platform.wsgi.application'
 
-<<<<<<< HEAD
 # Database configuration
 # Use DATABASE_URL from environment if available (production), otherwise use SQLite (development)
 if os.environ.get('DATABASE_URL'):
@@ -104,17 +99,6 @@ else:
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
-=======
-import dj_database_url
-
-# Replace your existing DATABASES with this:
-DATABASES = {
-    'default': dj_database_url.config(
-        default='sqlite:///' + str(BASE_DIR / 'db.sqlite3'),
-        conn_max_age=600
-    )
-}
->>>>>>> 285a18b92be12009f6954fe77d9ef1196de169dc
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
